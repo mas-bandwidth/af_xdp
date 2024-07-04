@@ -15,16 +15,25 @@ DONE
 
 	Find the name of the interface on hulk for the 10G NIC... 
 
-	enp8s0f0
-
-TODO
+		enp8s0f0
 
 	Get the reflector server running on hulk linux box with the 10G NIC. Disable logging so it's performant.
 
+	Set to only one RSS queue for now:
 
+		sudo ethtool -L enp8s0f0 combined 4
+		sudo ethtool -l enp8s0f0
 
-	Implement the AF_XDP client to send and receive packets (start with only sending one packet per-second...)
+TODO
 
-	Disable logs on server and verify I can send millions of packets per-second
+	Implement the AF_XDP client to send and receive packets. Start with just one queue.
 
-	Verify I can receive millions of reflected packets
+	--------------
+
+	Count how many packets per-second are being sent, and how many are being received.
+
+	Print out out once per-second.
+
+	Is it possible to spread packets across multiple RSS queues without having 64 machines?
+
+	Verify I can receive millions of reflected packets...
