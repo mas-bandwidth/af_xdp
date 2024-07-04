@@ -1,0 +1,11 @@
+
+XD_XDP resources:
+
+	https://medium.com/high-performance-network-programming/recapitulating-af-xdp-ef6c1ebead8				<--- really good
+	https://pkg.go.dev/go.fd.io/govpp/binapi/af_xdp
+	https://toonk.io/sending-network-packets-in-go/
+	https://www.kernel.org/doc/html/latest/networking/af_xdp.html
+	https://github.com/xdp-project/xdp-tutorial/tree/master/advanced03-AF_XDP
+	https://moddingcommunity.com/topic/74-xdp-stats-net-programming/
+	https://github.com/xdp-project/bpf-examples/tree/master/AF_XDP-forwarding
+	https://github.com/timfehr/xdp
