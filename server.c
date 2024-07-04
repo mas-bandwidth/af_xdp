@@ -159,13 +159,7 @@ int main( int argc, char *argv[] )
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
 
-    if ( argc != 2 )
-    {
-        printf( "\nusage: server <interface name>\n\n" );
-        return 1;
-    }
-
-    const char * interface_name = argv[1];
+    const char * interface_name = "enp8s0f0"; // hulk 10G NIC
 
     if ( bpf_init( &bpf, interface_name ) != 0 )
     {
