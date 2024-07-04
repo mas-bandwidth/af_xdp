@@ -1,5 +1,5 @@
 
-XD_XDP resources:
+AF_XDP resources:
 
 	https://medium.com/high-performance-network-programming/recapitulating-af-xdp-ef6c1ebead8				<--- really good
 	https://pkg.go.dev/go.fd.io/govpp/binapi/af_xdp
