@@ -1,11 +1,24 @@
+DONE
 
-AF_XDP resources:
+	Sketch out client and server programs
 
-	https://medium.com/high-performance-network-programming/recapitulating-af-xdp-ef6c1ebead8				<--- really good
-	https://pkg.go.dev/go.fd.io/govpp/binapi/af_xdp
-	https://toonk.io/sending-network-packets-in-go/
-	https://www.kernel.org/doc/html/latest/networking/af_xdp.html
-	https://github.com/xdp-project/xdp-tutorial/tree/master/advanced03-AF_XDP
-	https://moddingcommunity.com/topic/74-xdp-stats-net-programming/
-	https://github.com/xdp-project/bpf-examples/tree/master/AF_XDP-forwarding
-	https://github.com/timfehr/xdp
+	Update makefile and get it building and linking on linux
+
+	Read AF_XDP resources:
+
+		https://medium.com/high-performance-network-programming/recapitulating-af-xdp-ef6c1ebead8				<--- really good
+		https://www.kernel.org/doc/html/latest/networking/af_xdp.html
+		https://github.com/xdp-project/xdp-tutorial/tree/master/advanced03-AF_XDP
+		https://github.com/gamemann/XDP-Stats/tree/master/src/af_xdp
+		https://github.com/xdp-project/bpf-examples/tree/master/AF_XDP-forwarding
+		https://networkbuilders.intel.com/docs/networkbuilders/af-xdp-sockets-high-performance-networking-for-cloud-native-networking-technology-guide.pdf
+
+TODO
+
+	Get the reflector server running on one linux box with the 10G NIC
+
+	Implement the AF_XDP client to send and receive packets (start with only sending one packet per-second...)
+
+	Disable logs on server and verify I can send millions of packets per-second
+
+	Verify I can receive millions of reflected packets too
