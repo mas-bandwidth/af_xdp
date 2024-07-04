@@ -13,12 +13,18 @@ DONE
 		https://github.com/xdp-project/bpf-examples/tree/master/AF_XDP-forwarding
 		https://networkbuilders.intel.com/docs/networkbuilders/af-xdp-sockets-high-performance-networking-for-cloud-native-networking-technology-guide.pdf
 
+	Find the name of the interface on hulk for the 10G NIC... 
+
+	enp8s0f0
+
 TODO
 
-	Get the reflector server running on one linux box with the 10G NIC
+	Get the reflector server running on hulk linux box with the 10G NIC. Disable logging so it's performant.
+
+
 
 	Implement the AF_XDP client to send and receive packets (start with only sending one packet per-second...)
 
 	Disable logs on server and verify I can send millions of packets per-second
 
-	Verify I can receive millions of reflected packets too
+	Verify I can receive millions of reflected packets
