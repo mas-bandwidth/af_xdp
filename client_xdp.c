@@ -1,11 +1,11 @@
 /*
-    UDP reflect server XDP program
+    UDP client XDP program
 
-    Reflects IPv4 UDP packets sent to port 40000 back to sender.
+    Passes packets received down to AF_XDP socket for processing
 
     USAGE:
 
-        clang -Ilibbpf/src -g -O2 -target bpf -c server_xdp.c -o server_xdp.o
+        clang -Ilibbpf/src -g -O2 -target bpf -c client_xdp.c -o client_xdp.o
         sudo cat /sys/kernel/debug/tracing/trace_pipe
 */
 
@@ -78,7 +78,7 @@ static void reflect_packet( void * data, int payload_bytes )
     ip->check = checksum;
 }
 
-SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx ) 
+SEC("client_xdp") int client_xdp_filter( struct xdp_md *ctx ) 
 { 
     void * data = (void*) (long) ctx->data; 
 
@@ -102,11 +102,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                     {
                         if ( udp->dest == __constant_htons(40000) )
                         {
-                            void * payload = (void*) udp + sizeof(struct udphdr);
-                            int payload_bytes = data_end - payload;
-                            debug_printf( "reflecting %d byte udp packet", payload_bytes );
-                            reflect_packet( data, payload_bytes );
-                            return XDP_TX;
+                            return XDP_REDIRECT;
                         }
                     }
                 }
