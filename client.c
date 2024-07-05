@@ -116,7 +116,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     if ( setrlimit( RLIMIT_MEMLOCK, &rlim ) ) 
     {
-        printf( "\nerror: could not load setrlimit\n\n");
+        printf( "\nerror: could not setrlimit\n\n");
         return 1;
     }
 
