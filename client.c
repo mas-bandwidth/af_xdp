@@ -2,6 +2,8 @@
     UDP client (userspace)
 
     Runs on Ubuntu 22.04 LTS 64bit with Linux Kernel 6.5+ *ONLY*
+
+    Derived from https://github.com/xdp-project/xdp-tutorial/tree/master/advanced03-AF_XDP
 */
 
 #include <memory.h>

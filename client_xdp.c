@@ -40,6 +40,13 @@
 #define debug_printf(...) do { } while (0)
 #endif // #if DEBUG
 
+struct {
+    __uint(type, BPF_MAP_TYPE_XSKMAP);
+    __type(key, __u32);
+    __type(value, __u32);
+    __uint(max_entries, 256);
+} xsks_map SEC(".maps");
+
 static void reflect_packet( void * data, int payload_bytes )
 {
     struct ethhdr * eth = data;
@@ -102,7 +109,10 @@ SEC("client_xdp") int client_xdp_filter( struct xdp_md *ctx )
                     {
                         if ( udp->dest == __constant_htons(40000) )
                         {
-                            return XDP_REDIRECT;
+                            if ( bpf_map_lookup_elem( &xsks_map, &index ) )
+                            {
+                                return bpf_redirect_map( &xsks_map, index, 0 );
+                            }
                         }
                     }
                 }
