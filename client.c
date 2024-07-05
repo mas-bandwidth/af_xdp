@@ -28,7 +28,7 @@
 #define NUM_FRAMES         4096
 #define FRAME_SIZE         XSK_UMEM__DEFAULT_FRAME_SIZE
 
-struct bpf_t
+struct client_t
 {
     int interface_index;
     struct xdp_program * program;
@@ -41,9 +41,11 @@ struct bpf_t
     struct xsk_ring_prod fill;
     struct xsk_ring_cons complete;
     struct xsk_socket * xsk;
+    uint64_t umem_frame_addr[NUM_FRAMES];
+    uint32_t umem_frame_free;
 };
 
-int bpf_init( struct bpf_t * bpf, const char * interface_name )
+int client_init( struct client_t * client, const char * interface_name )
 {
     // we can only run xdp programs as root
 
@@ -72,8 +74,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
                 if ( strcmp( interface_name, iap->ifa_name ) == 0 )
                 {
                     printf( "found network interface: '%s'\n", iap->ifa_name );
-                    bpf->interface_index = if_nametoindex( iap->ifa_name );
-                    if ( !bpf->interface_index ) 
+                    client->interface_index = if_nametoindex( iap->ifa_name );
+                    if ( !client->interface_index ) 
                     {
                         printf( "\nerror: if_nametoindex failed\n\n" );
                         return 1;
@@ -97,8 +99,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     printf( "loading client_xdp...\n" );
 
-    bpf->program = xdp_program__open_file( "client_xdp.o", "client_xdp", NULL );
-    if ( libxdp_get_error( bpf->program ) ) 
+    client->program = xdp_program__open_file( "client_xdp.o", "client_xdp", NULL );
+    if ( libxdp_get_error( client->program ) ) 
     {
         printf( "\nerror: could not load client_xdp program\n\n");
         return 1;
@@ -108,18 +110,18 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     printf( "attaching client_xdp to network interface\n" );
 
-    int ret = xdp_program__attach( bpf->program, bpf->interface_index, XDP_MODE_NATIVE, 0 );
+    int ret = xdp_program__attach( client->program, client->interface_index, XDP_MODE_NATIVE, 0 );
     if ( ret == 0 )
     {
-        bpf->attached_native = true;
+        client->attached_native = true;
     } 
     else
     {
         printf( "falling back to skb mode...\n" );
-        ret = xdp_program__attach( bpf->program, bpf->interface_index, XDP_MODE_SKB, 0 );
+        ret = xdp_program__attach( client->program, client->interface_index, XDP_MODE_SKB, 0 );
         if ( ret == 0 )
         {
-            bpf->attached_skb = true;
+            client->attached_skb = true;
         }
         else
         {
@@ -142,7 +144,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     const int buffer_size = NUM_FRAMES * FRAME_SIZE;
 
-    if ( posix_memalign( &bpf->buffer, getpagesize(), buffer_size ) ) 
+    if ( posix_memalign( &client->buffer, getpagesize(), buffer_size ) ) 
     {
         printf( "\nerror: could not allocate buffer\n\n" );
         return 1;
@@ -150,7 +152,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // allocate umem
 
-    ret = xsk_umem__create( &bpf->umem, bpf->buffer, buffer_size, &bpf->fill, &bpf->complete, NULL );
+    ret = xsk_umem__create( &client->umem, client->buffer, buffer_size, &client->fill, &client->complete, NULL );
     if ( ret ) 
     {
         printf( "\nerror: could not create umem\n\n" );
@@ -159,7 +161,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // get the xks_map file handle
 
-    struct bpf_map * map = bpf_object__find_map_by_name( xdp_program__bpf_obj( bpf->program ), "xsks_map" );
+    struct client_map * map = bpf_object__find_map_by_name( xdp_program__bpf_obj( client->program ), "xsks_map" );
     int xsk_map_fd = bpf_map__fd( map );
     if ( xsk_map_fd < 0 ) 
     {
@@ -181,48 +183,59 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     int queue_id = 0;
 
-    ret = xsk_socket__create( &bpf->xsk, interface_name, queue_id, bpf->umem, &bpf->receive, &bpf->send, &xsk_config );
+    ret = xsk_socket__create( &client->xsk, interface_name, queue_id, client->umem, &client->receive, &client->send, &xsk_config );
     if ( ret )
     {
         printf( "\nerror: could not create xsk socket\n\n" );
         return 1;
     }
 
-    ret = xsk_socket__update_xskmap( bpf->xsk, xsk_map_fd );
+    ret = xsk_socket__update_xskmap( client->xsk, xsk_map_fd );
     if ( ret )
     {
         printf( "\nerror: could not update xskmap\n\n" );
         return 1;
     }
 
+    // initialize umem frame allocation
+
+    for ( int i = 0; i < NUM_FRAMES; i++ )
+    {
+        client->umem_frame_addr[i] = i * FRAME_SIZE;
+    }
+
+    client->umem_frame_free = NUM_FRAMES;
+
     return 0;
 }
 
-void bpf_shutdown( struct bpf_t * bpf )
+void client_shutdown( struct client_t * client )
 {
-    assert( bpf );
+    assert( client );
 
-    if ( bpf->program != NULL )
+    if ( client->program != NULL )
     {
-        if ( bpf->attached_native )
+        if ( client->attached_native )
         {
-            xdp_program__detach( bpf->program, bpf->interface_index, XDP_MODE_NATIVE, 0 );
+            xdp_program__detach( client->program, client->interface_index, XDP_MODE_NATIVE, 0 );
         }
-        if ( bpf->attached_skb )
+
+        if ( client->attached_skb )
         {
-            xdp_program__detach( bpf->program, bpf->interface_index, XDP_MODE_SKB, 0 );
+            xdp_program__detach( client->program, client->interface_index, XDP_MODE_SKB, 0 );
         }
-        xdp_program__close( bpf->program );
 
-        xsk_socket__delete( bpf->xsk );
+        xdp_program__close( client->program );
 
-        xsk_umem__delete( bpf->umem );
+        xsk_socket__delete( client->xsk );
 
-        free( bpf->buffer );
+        xsk_umem__delete( client->umem );
+
+        free( client->buffer );
     }
 }
 
-static struct bpf_t bpf;
+static struct client_t client;
 
 volatile bool quit;
 
@@ -239,7 +252,7 @@ void clean_shutdown_handler( int signal )
 
 static void cleanup()
 {
-    bpf_shutdown( &bpf );
+    bpf_shutdown( &client );
     fflush( stdout );
 }
 
@@ -257,7 +270,7 @@ int main( int argc, char *argv[] )
 
     const uint16_t server_port = 40000;
 
-    if ( bpf_init( &bpf, interface_name ) != 0 )
+    if ( client_init( &client, interface_name ) != 0 )
     {
         cleanup();
         return 1;
@@ -278,12 +291,6 @@ int main( int argc, char *argv[] )
 
 // todo: don't really understand the ring buffer operations yet. study the code...
 /*
-    // Initialize umem frame allocation
-    for (i = 0; i < NUM_FRAMES; i++)
-        xsk_info->umem_frame_addr[i] = i * FRAME_SIZE;
-
-    xsk_info->umem_frame_free = NUM_FRAMES;
-
     // Stuff the receive path with buffers, we assume we have enough
     ret = xsk_ring_prod__reserve(&xsk_info->umem->fq,
                      XSK_RING_PROD__DEFAULT_NUM_DESCS,
