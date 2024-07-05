@@ -28,9 +28,13 @@ DONE
 
 	Modify client so it has hard coded interface name
 
+	Get the server IP address and port hardcoded in the client
+
+		192.168.183.124:40000
+
 TODO
 
-	Get the server IP address and port hardcoded in the client
+	
 
 	--------------
 

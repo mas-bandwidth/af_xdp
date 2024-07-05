@@ -161,6 +161,10 @@ int main( int argc, char *argv[] )
 
     const char * interface_name = "enp8s0f0"; // vision 10G NIC
 
+    const uint32_t server_address = 0xC0A8B77C; // 192.168.183.124
+
+    const uint16_t server_port = 40000;
+
     if ( bpf_init( &bpf, interface_name ) != 0 )
     {
         cleanup();
