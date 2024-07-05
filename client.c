@@ -140,7 +140,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     const int buffer_size = NUM_FRAMES * FRAME_SIZE;
 
-    if ( posix_memalign( &packet_buffer, getpagesize(), buffer_size ) ) 
+    if ( posix_memalign( &bpf->buffer, getpagesize(), buffer_size ) ) 
     {
         printf( "\nerror: could not allocate buffer\n\n" );
         return 1;
