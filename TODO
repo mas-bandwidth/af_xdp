@@ -44,11 +44,11 @@ DONE
 
 	Create the xsk map in the xdp program and grab file handle in userspace
 
-TODO
-
 	Create the xsk socket
 
 	Clean up the xsk socket on destroy
+
+TODO
 
 	...
 
