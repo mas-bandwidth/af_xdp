@@ -109,6 +109,8 @@ SEC("client_xdp") int client_xdp_filter( struct xdp_md *ctx )
                     {
                         if ( udp->dest == __constant_htons(40000) )
                         {
+                            int index = ctx->rx_queue_index;
+
                             if ( bpf_map_lookup_elem( &xsks_map, &index ) )
                             {
                                 return bpf_redirect_map( &xsks_map, index, 0 );
