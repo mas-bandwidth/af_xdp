@@ -11,11 +11,16 @@
 #include <assert.h>
 #include <unistd.h>
 #include <ifaddrs.h>
-#include <net/if.h>
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
+#include <xdp/xsk.h>
 #include <xdp/libxdp.h>
 #include <sys/resource.h>
+
+#include <arpa/inet.h>
+#include <net/if.h>
+#include <linux/if_link.h>
+#include <linux/if_ether.h>
 
 struct bpf_t
 {
@@ -23,6 +28,13 @@ struct bpf_t
     struct xdp_program * program;
     bool attached_native;
     bool attached_skb;
+    struct xsk_ring_prod fill;
+    struct xsk_ring_cons complete;
+    struct xsk_umem * umem;
+    struct xsk_ring_cons rx;
+    struct xsk_ring_prod tx;
+    struct xsk_socket * xsk;
+    void * buffer;
 };
 
 int bpf_init( struct bpf_t * bpf, const char * interface_name )
