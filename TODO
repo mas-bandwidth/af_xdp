@@ -32,10 +32,20 @@ DONE
 
 		192.168.183.124:40000
 
-TODO
-
 	Sketch out the client as required to work with AF_XDP packets
 
+	Following tutorial here: https://github.com/xdp-project/xdp-tutorial/tree/master/advanced03-AF_XDP
+
+	Packet buffer is created.
+
+	umem is created.
+
+	Cleanup for buffer and umem.
+
+TODO
+
+	Create the xsk socket for AF_XDP
+	
 	...
 
 	--------------

@@ -155,6 +155,46 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    // get the xks_map file handle
+
+    struct bpf_map * map = bpf_object__find_map_by_name( xdp_program__bpf_obj( bpf->program ), "xsks_map" );
+    xsk_map_fd = bpf_map__fd( map );
+    if ( xsk_map_fd < 0 ) 
+    {
+        printf( "\nerror: no xsks map found\n\n" );
+        return 1;
+    }
+
+    // create xsk socket
+
+    struct xsk_socket_config xsk_config;
+
+    memset( &xsk_config, 0, sizeof(xsk_config) )
+
+    xsk_config.rx_size = XSK_RING_CONS__DEFAULT_NUM_DESCS;
+    xsk_config.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
+    xsk_config.xdp_flags = 0;
+    xsk_config.bind_flags = cfg->xsk_bind_flags;
+    xsk_config.libbpf_flags = XSK_LIBBPF_FLAGS__INHIBIT_PROG_LOAD;
+
+    // todo
+    
+    /*
+    ret = xsk_socket__create(&xsk_info->xsk, cfg->ifname,
+                 cfg->xsk_if_queue, umem->umem, &xsk_info->rx,
+                 &xsk_info->tx, &xsk_cfg);
+    if (ret)
+        goto error_exit;
+    */
+
+    // todo
+
+    /*
+        ret = xsk_socket__update_xskmap(xsk_info->xsk, xsk_map_fd);
+        if (ret)
+            goto error_exit;
+    */
+
     return 0;
 }
 
