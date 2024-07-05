@@ -15,6 +15,7 @@
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
 #include <xdp/libxdp.h>
+#include <sys/resource.h>
 
 struct bpf_t
 {
