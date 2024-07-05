@@ -181,7 +181,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     int queue_id = 0;
 
-    ret = xsk_socket__create( &bpf->xsk, interface_name, queue_id, bpf->umem, &bpf->rx, &bpf->tx, &xsk_config );
+    ret = xsk_socket__create( &bpf->xsk, interface_name, queue_id, bpf->umem, &bpf->receive, &bpf->send, &xsk_config );
     if ( ret )
     {
         printf( "\nerror: could not create xsk socket\n\n" );
