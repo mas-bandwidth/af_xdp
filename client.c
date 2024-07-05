@@ -174,25 +174,26 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     xsk_config.rx_size = XSK_RING_CONS__DEFAULT_NUM_DESCS;
     xsk_config.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
     xsk_config.xdp_flags = 0;
-    xsk_config.bind_flags = cfg->xsk_bind_flags;
+    xsk_config.bind_flags = 0;
     xsk_config.libbpf_flags = XSK_LIBBPF_FLAGS__INHIBIT_PROG_LOAD;
 
     // todo
-    
+
     /*
-    ret = xsk_socket__create(&xsk_info->xsk, cfg->ifname,
-                 cfg->xsk_if_queue, umem->umem, &xsk_info->rx,
-                 &xsk_info->tx, &xsk_cfg);
-    if (ret)
+    int rss_queue_id = 0;
+
+    ret = xsk_socket__create( &xsk, interface_name, queue_id, bpf->umem, &bpf->rx, &bpf->tx, &xsk_config );
+    if ( ret )
+    {
+        printf( "\nerror: could not create xsk socket\n\n" );
+        return 1;
+    }
+
+    ret = xsk_socket__update_xskmap( xsk, xsk_map_fd );
+    if ( ret )
+    {
         goto error_exit;
-    */
-
-    // todo
-
-    /*
-        ret = xsk_socket__update_xskmap(xsk_info->xsk, xsk_map_fd);
-        if (ret)
-            goto error_exit;
+    }
     */
 
     return 0;

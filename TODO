@@ -44,8 +44,10 @@ DONE
 
 TODO
 
-	Create the xsk socket for AF_XDP
-	
+	Create the xsk socket
+
+	Clean up the xsk socket on destroy
+
 	...
 
 	--------------
