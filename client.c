@@ -16,6 +16,7 @@
 #include <xdp/xsk.h>
 #include <xdp/libxdp.h>
 #include <sys/resource.h>
+#include <stdlib.h>
 
 #include <arpa/inet.h>
 #include <net/if.h>
