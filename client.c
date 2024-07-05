@@ -109,6 +109,16 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         }
     }
 
+    // allow unlimited locking of memory, so all memory needed for packet buffers can be locked.
+
+    struct rlimit rlim = { RLIM_INFINITY, RLIM_INFINITY };
+
+    if ( setrlimit( RLIMIT_MEMLOCK, &rlim ) ) 
+    {
+        printf( "\nerror: could not load setrlimit\n\n");
+        return 1;
+    }
+
     return 0;
 }
 

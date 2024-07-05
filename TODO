@@ -34,11 +34,9 @@ DONE
 
 TODO
 
-	
+	Sketch out the client as required to work with AF_XDP packets
 
-	--------------
-
-	Implement the AF_XDP client to send and receive packets. Start with just one queue.
+	...
 
 	--------------
 
