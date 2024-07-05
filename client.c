@@ -28,13 +28,13 @@ struct bpf_t
     struct xdp_program * program;
     bool attached_native;
     bool attached_skb;
+    void * buffer;
+    struct xsk_umem * umem;
+    struct xsk_ring_prod send;
+    struct xsk_ring_cons receive;
     struct xsk_ring_prod fill;
     struct xsk_ring_cons complete;
-    struct xsk_umem * umem;
-    struct xsk_ring_cons rx;
-    struct xsk_ring_prod tx;
     struct xsk_socket * xsk;
-    void * buffer;
 };
 
 int bpf_init( struct bpf_t * bpf, const char * interface_name )
@@ -132,6 +132,25 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    // allocate buffer for umem
+
+    const int buffer_size = NUM_FRAMES * FRAME_SIZE;
+
+    if ( posix_memalign( &packet_buffer, getpagesize(), buffer_size ) ) 
+    {
+        printf( "\nerror: could not allocate buffer\n\n" );
+        return 1;
+    }
+
+    // allocate umem
+
+    ret = xsk_umem__create( &bpf->umem, buffer, size, &bpf->fill, &umem->complete, NULL );
+    if ( ret ) 
+    {
+        printf( "\nerror: could not create umem\n\n")
+        return 1;
+    }
+
     return 0;
 }
 
@@ -150,6 +169,10 @@ void bpf_shutdown( struct bpf_t * bpf )
             xdp_program__detach( bpf->program, bpf->interface_index, XDP_MODE_SKB, 0 );
         }
         xdp_program__close( bpf->program );
+
+        xsk_umem__delete( bpf->umem );
+
+        free( bpf->buffer );
     }
 }
 
@@ -182,7 +205,7 @@ int main( int argc, char *argv[] )
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
 
-    const char * interface_name = "enp8s0f0"; // vision 10G NIC
+    const char * interface_name = "enp8s0f0";   // vision 10G NIC
 
     const uint32_t server_address = 0xC0A8B77C; // 192.168.183.124
 
