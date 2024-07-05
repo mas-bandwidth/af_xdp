@@ -22,6 +22,9 @@
 #include <linux/if_link.h>
 #include <linux/if_ether.h>
 
+#define NUM_FRAMES         4096
+#define FRAME_SIZE         XSK_UMEM__DEFAULT_FRAME_SIZE
+
 struct bpf_t
 {
     int interface_index;
