@@ -169,7 +169,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     struct xsk_socket_config xsk_config;
 
-    memset( &xsk_config, 0, sizeof(xsk_config) )
+    memset( &xsk_config, 0, sizeof(xsk_config) );
 
     xsk_config.rx_size = XSK_RING_CONS__DEFAULT_NUM_DESCS;
     xsk_config.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
