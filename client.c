@@ -161,7 +161,7 @@ int client_init( struct client_t * client, const char * interface_name )
 
     // get the xks_map file handle
 
-    struct client_map * map = bpf_object__find_map_by_name( xdp_program__bpf_obj( client->program ), "xsks_map" );
+    struct bpf_map * map = bpf_object__find_map_by_name( xdp_program__bpf_obj( client->program ), "xsks_map" );
     int xsk_map_fd = bpf_map__fd( map );
     if ( xsk_map_fd < 0 ) 
     {
