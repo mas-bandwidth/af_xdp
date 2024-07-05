@@ -214,6 +214,8 @@ void bpf_shutdown( struct bpf_t * bpf )
         }
         xdp_program__close( bpf->program );
 
+        xsk_socket__delete( bpf->xsk );
+
         xsk_umem__delete( bpf->umem );
 
         free( bpf->buffer );
