@@ -148,7 +148,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // allocate umem
 
-    ret = xsk_umem__create( &bpf->umem, bpf->buffer, size, &bpf->fill, &umem->complete, NULL );
+    ret = xsk_umem__create( &bpf->umem, bpf->buffer, buffer_size, &bpf->fill, &bpf->complete, NULL );
     if ( ret ) 
     {
         printf( "\nerror: could not create umem\n\n")
