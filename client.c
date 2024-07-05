@@ -179,24 +179,21 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     xsk_config.bind_flags = 0;
     xsk_config.libbpf_flags = XSK_LIBBPF_FLAGS__INHIBIT_PROG_LOAD;
 
-    // todo
-
-    /*
     int rss_queue_id = 0;
 
-    ret = xsk_socket__create( &xsk, interface_name, queue_id, bpf->umem, &bpf->rx, &bpf->tx, &xsk_config );
+    ret = xsk_socket__create( &bpf->xsk, interface_name, queue_id, bpf->umem, &bpf->rx, &bpf->tx, &xsk_config );
     if ( ret )
     {
         printf( "\nerror: could not create xsk socket\n\n" );
         return 1;
     }
 
-    ret = xsk_socket__update_xskmap( xsk, xsk_map_fd );
+    ret = xsk_socket__update_xskmap( bpf->xsk, xsk_map_fd );
     if ( ret )
     {
-        goto error_exit;
+        printf( "\nerror: could not update xskmap\n\n" );
+        return 1;
     }
-    */
 
     return 0;
 }

@@ -42,6 +42,8 @@ DONE
 
 	Cleanup for buffer and umem.
 
+	Create the xsk map in the xdp program and grab file handle in userspace
+
 TODO
 
 	Create the xsk socket
