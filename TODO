@@ -24,7 +24,15 @@ DONE
 		sudo ethtool -L enp8s0f0 combined 4
 		sudo ethtool -l enp8s0f0
 
+	Setup vision linux box so it's ready to go
+
+	Modify client so it has hard coded interface name
+
 TODO
+
+	Get the server IP address and port hardcoded in the client
+
+	--------------
 
 	Implement the AF_XDP client to send and receive packets. Start with just one queue.
 
