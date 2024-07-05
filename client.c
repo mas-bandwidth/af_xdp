@@ -158,7 +158,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     // get the xks_map file handle
 
     struct bpf_map * map = bpf_object__find_map_by_name( xdp_program__bpf_obj( bpf->program ), "xsks_map" );
-    xsk_map_fd = bpf_map__fd( map );
+    int xsk_map_fd = bpf_map__fd( map );
     if ( xsk_map_fd < 0 ) 
     {
         printf( "\nerror: no xsks map found\n\n" );
