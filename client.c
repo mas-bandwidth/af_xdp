@@ -252,7 +252,7 @@ void clean_shutdown_handler( int signal )
 
 static void cleanup()
 {
-    bpf_shutdown( &client );
+    client_shutdown( &client );
     fflush( stdout );
 }
 
