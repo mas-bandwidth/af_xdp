@@ -65,11 +65,11 @@ struct client_t
     uint32_t num_frames;
 };
 
-int pin_thread_to_cpu( int cpu ) 
+bool pin_thread_to_cpu( int cpu ) 
 {
     int num_cpus = sysconf( _SC_NPROCESSORS_ONLN );
     if ( cpu < 0 || cpu >= num_cpus  )
-        return EINVAL;
+        return false;
 
     cpu_set_t cpuset;
     CPU_ZERO( &cpuset );
@@ -77,7 +77,7 @@ int pin_thread_to_cpu( int cpu )
 
     pthread_t current_thread = pthread_self();    
 
-    return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
+    pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
 }
 
 int client_init( struct client_t * client, const char * interface_name )
