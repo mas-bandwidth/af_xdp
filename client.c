@@ -261,11 +261,11 @@ static void cleanup()
 
 uint64_t client_alloc_frame( struct client_t * client )
 {
-    if ( clients->num_frames == 0 )
-        return INVALID_UMEM_FRAME;
+    if ( client->num_frames == 0 )
+        return INVALID_FRAME;
     client->num_frames--;
     uint64_t frame = client->frames[client->num_frames];
-    client->frames[client->num_frames] = INVALID_UMEM_FRAME;
+    client->frames[client->num_frames] = INVALID_FRAME;
     return frame;
 }
 
@@ -276,7 +276,7 @@ void client_free_frame( struct client_t * client, uint64_t frame )
     client->num_frames++;
 }
 
-void client_update()
+void client_update( struct client_t * client )
 {
     // queue up packets in transmit queue
 
@@ -342,7 +342,7 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
-        client_update();
+        client_update( &client);
 
         usleep( 1000000 );
     }
