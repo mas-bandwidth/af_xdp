@@ -291,6 +291,30 @@ void client_free_frame( struct client_t * client, uint64_t frame )
     client->num_frames++;
 }
 
+uint16_t ipv4_checksum( const void * data, size_t hdr_len )
+{
+    unsigned long sum = 0;
+
+    const uint16_t * p = (const uint16_t*) data;
+
+    while ( hdr_len > 1 )
+    {
+        sum += *p++;
+        if ( sum & 0x80000000 )
+        {
+            sum = ( sum & 0xFFFF ) + ( sum >> 16 );
+        }
+        hdr_len -= 2;
+    }
+
+    while ( sum >> 16 )
+    {
+        sum = (sum & 0xFFFF) + (sum >> 16);
+    }
+
+    return ~sum;
+}
+
 void client_generate_packet( void * data, int payload_bytes )
 {
     struct ethhdr * eth = data;
@@ -316,9 +340,7 @@ void client_generate_packet( void * data, int payload_bytes )
     ip->saddr    = CLIENT_IPV4_ADDRESS;
     ip->daddr    = SERVER_IPV4_ADDRESS;
     ip->check    = 0; 
-
-    // todo: bring across checksum
-    // ip->check    = inet_csum(ip, sizeof(struct iphdr));
+    ip->check    = ipv4_checksum( ip, sizeof( struct iphdr ) );
 
     // generate udp header
 
