@@ -155,7 +155,7 @@ int client_init( struct client_t * client, const char * interface_name )
 
     // allocate umem
 
-    ret = xsk_umem__create( &client->umem, client->buffer, buffer_size, &client->fill, &client->complete_queue, NULL );
+    ret = xsk_umem__create( &client->umem, client->buffer, buffer_size, &client->fill_queue, &client->complete_queue, NULL );
     if ( ret ) 
     {
         printf( "\nerror: could not create umem\n\n" );
@@ -280,13 +280,30 @@ void client_update()
 {
     // queue up packets in transmit queue
 
-    // ...
+    // todo: grab all the frames and fill them with packets to send, send it all in one batch
+
+    /*
+        // Here we sent the packet out of the receive port. Note that
+        // we allocate one entry and schedule it. Your design would be
+        // faster if you do batch processing/transmission
+
+        ret = xsk_ring_prod__reserve(&xsk->tx, 1, &tx_idx);
+        if (ret != 1) {
+            // No more transmit slots, drop the packet
+            return false;
+        }
+
+        xsk_ring_prod__tx_desc(&xsk->tx, tx_idx)->addr = addr;
+        xsk_ring_prod__tx_desc(&xsk->tx, tx_idx)->len = len;
+        xsk_ring_prod__submit(&xsk->tx, 1);
+        xsk->outstanding_tx++;
+    */
 
     // send queued packets
 
     sendto( xsk_socket__fd( client->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
 
-    // mark completed transmit buffers as free
+    // mark completed send frames as free
 
     uint32_t complete_index;
 
@@ -336,276 +353,3 @@ int main( int argc, char *argv[] )
 
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-#if 0
-
-/* SPDX-License-Identifier: GPL-2.0 */
-
-#include <assert.h>
-#include <errno.h>
-#include <getopt.h>
-#include <locale.h>
-#include <poll.h>
-#include <pthread.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
-
-#include <sys/resource.h>
-
-#include <bpf/bpf.h>
-#include <xdp/xsk.h>
-#include <xdp/libxdp.h>
-
-#include <arpa/inet.h>
-#include <net/if.h>
-#include <linux/if_link.h>
-#include <linux/if_ether.h>
-#include <linux/ipv6.h>
-#include <linux/icmpv6.h>
-
-#include "../common/common_params.h"
-#include "../common/common_user_bpf_xdp.h"
-#include "../common/common_libbpf.h"
-
-#define NUM_FRAMES         4096
-#define FRAME_SIZE         XSK_UMEM__DEFAULT_FRAME_SIZE
-#define RX_BATCH_SIZE      64
-#define INVALID_UMEM_FRAME UINT64_MAX
-
-static struct xdp_program *prog;
-int xsk_map_fd;
-bool custom_xsk = false;
-struct config cfg = {
-    .ifindex   = -1,
-};
-
-struct xsk_umem_info {
-    struct xsk_ring_prod fq;
-    struct xsk_ring_cons cq;
-    struct xsk_umem *umem;
-    void *buffer;
-};
-struct stats_record {
-    uint64_t timestamp;
-    uint64_t rx_packets;
-    uint64_t rx_bytes;
-    uint64_t tx_packets;
-    uint64_t tx_bytes;
-};
-struct xsk_socket_info {
-    struct xsk_ring_cons rx;
-    struct xsk_ring_prod tx;
-    struct xsk_umem_info *umem;
-    struct xsk_socket *xsk;
-
-    uint64_t umem_frame_addr[NUM_FRAMES];
-    uint32_t umem_frame_free;
-
-    uint32_t outstanding_tx;
-
-    struct stats_record stats;
-    struct stats_record prev_stats;
-};
-
-static inline __u32 xsk_ring_prod__free(struct xsk_ring_prod *r)
-{
-    r->cached_cons = *r->consumer + r->size;
-    return r->cached_cons - r->cached_prod;
-}
-
-static const char *__doc__ = "AF_XDP kernel bypass example\n";
-
-static const struct option_wrapper long_options[] = {
-
-    {{"help",    no_argument,       NULL, 'h' },
-     "Show help", false},
-
-    {{"dev",     required_argument, NULL, 'd' },
-     "Operate on device <ifname>", "<ifname>", true},
-
-    {{"skb-mode",    no_argument,       NULL, 'S' },
-     "Install XDP program in SKB (AKA generic) mode"},
-
-    {{"native-mode", no_argument,       NULL, 'N' },
-     "Install XDP program in native mode"},
-
-    {{"auto-mode",   no_argument,       NULL, 'A' },
-     "Auto-detect SKB or native mode"},
-
-    {{"force",   no_argument,       NULL, 'F' },
-     "Force install, replacing existing program on interface"},
-
-    {{"copy",        no_argument,       NULL, 'c' },
-     "Force copy mode"},
-
-    {{"zero-copy",   no_argument,       NULL, 'z' },
-     "Force zero-copy mode"},
-
-    {{"queue",   required_argument, NULL, 'Q' },
-     "Configure interface receive queue for AF_XDP, default=0"},
-
-    {{"poll-mode",   no_argument,       NULL, 'p' },
-     "Use the poll() API waiting for packets to arrive"},
-
-    {{"quiet",   no_argument,       NULL, 'q' },
-     "Quiet mode (no output)"},
-
-    {{"filename",    required_argument, NULL,  1  },
-     "Load program from <file>", "<file>"},
-
-    {{"progname",    required_argument, NULL,  2  },
-     "Load program from function <name> in the ELF file", "<name>"},
-
-    {{0, 0, NULL,  0 }, NULL, false}
-};
-
-static bool global_exit;
-
-static struct xsk_umem_info *configure_xsk_umem(void *buffer, uint64_t size)
-{
-    struct xsk_umem_info *umem;
-    int ret;
-
-    umem = calloc(1, sizeof(*umem));
-    if (!umem)
-        return NULL;
-
-    ret = xsk_umem__create(&umem->umem, buffer, size, &umem->fq, &umem->cq,
-                   NULL);
-    if (ret) {
-        errno = -ret;
-        return NULL;
-    }
-
-    umem->buffer = buffer;
-    return umem;
-}
-
-static uint64_t xsk_alloc_umem_frame(struct xsk_socket_info *xsk)
-{
-    uint64_t frame;
-    if (xsk->umem_frame_free == 0)
-        return INVALID_UMEM_FRAME;
-
-    frame = xsk->umem_frame_addr[--xsk->umem_frame_free];
-    xsk->umem_frame_addr[xsk->umem_frame_free] = INVALID_UMEM_FRAME;
-    return frame;
-}
-
-static void xsk_free_umem_frame(struct xsk_socket_info *xsk, uint64_t frame)
-{
-    assert(xsk->umem_frame_free < NUM_FRAMES);
-
-    xsk->umem_frame_addr[xsk->umem_frame_free++] = frame;
-}
-
-static uint64_t xsk_umem_free_frames(struct xsk_socket_info *xsk)
-{
-    return xsk->umem_frame_free;
-}
-
-static struct xsk_socket_info *xsk_configure_socket(struct config *cfg,
-                            struct xsk_umem_info *umem)
-{
-    struct xsk_socket_config xsk_cfg;
-    struct xsk_socket_info *xsk_info;
-    uint32_t idx;
-    int i;
-    int ret;
-    uint32_t prog_id;
-
-    xsk_info = calloc(1, sizeof(*xsk_info));
-    if (!xsk_info)
-        return NULL;
-
-    xsk_info->umem = umem;
-    xsk_cfg.rx_size = XSK_RING_CONS__DEFAULT_NUM_DESCS;
-    xsk_cfg.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
-    xsk_cfg.xdp_flags = cfg->xdp_flags;
-    xsk_cfg.bind_flags = cfg->xsk_bind_flags;
-    xsk_cfg.libbpf_flags = (custom_xsk) ? XSK_LIBBPF_FLAGS__INHIBIT_PROG_LOAD: 0;
-    ret = xsk_socket__create(&xsk_info->xsk, cfg->ifname,
-                 cfg->xsk_if_queue, umem->umem, &xsk_info->rx,
-                 &xsk_info->tx, &xsk_cfg);
-    if (ret)
-        goto error_exit;
-
-    if (custom_xsk) {
-        ret = xsk_socket__update_xskmap(xsk_info->xsk, xsk_map_fd);
-        if (ret)
-            goto error_exit;
-    } else {
-        /* Getting the program ID must be after the xdp_socket__create() call */
-        if (bpf_xdp_query_id(cfg->ifindex, cfg->xdp_flags, &prog_id))
-            goto error_exit;
-    }
-
-    /* Initialize umem frame allocation */
-    for (i = 0; i < NUM_FRAMES; i++)
-        xsk_info->umem_frame_addr[i] = i * FRAME_SIZE;
-
-    xsk_info->umem_frame_free = NUM_FRAMES;
-
-    /* Stuff the receive path with buffers, we assume we have enough */
-    ret = xsk_ring_prod__reserve(&xsk_info->umem->fq,
-                     XSK_RING_PROD__DEFAULT_NUM_DESCS,
-                     &idx);
-
-    if (ret != XSK_RING_PROD__DEFAULT_NUM_DESCS)
-        goto error_exit;
-
-    for (i = 0; i < XSK_RING_PROD__DEFAULT_NUM_DESCS; i ++)
-        *xsk_ring_prod__fill_addr(&xsk_info->umem->fq, idx++) =
-            xsk_alloc_umem_frame(xsk_info);
-
-    xsk_ring_prod__submit(&xsk_info->umem->fq,
-                  XSK_RING_PROD__DEFAULT_NUM_DESCS);
-
-    return xsk_info;
-
-error_exit:
-    errno = -ret;
-    return NULL;
-}
-
-static void complete_tx(struct xsk_socket_info *xsk)
-{
-    unsigned int completed;
-    uint32_t idx_cq;
-
-    if (!xsk->outstanding_tx)
-        return;
-
-    sendto(xsk_socket__fd(xsk->xsk), NULL, 0, MSG_DONTWAIT, NULL, 0);
-
-    /* Collect/free completed TX buffers */
-    completed = xsk_ring_cons__peek(&xsk->umem->cq,
-                    XSK_RING_CONS__DEFAULT_NUM_DESCS,
-                    &idx_cq);
-
-    if (completed > 0) {
-        for (int i = 0; i < completed; i++)
-            xsk_free_umem_frame(xsk,
-                        *xsk_ring_cons__comp_addr(&xsk->umem->cq,
-                                      idx_cq++));
-
-        xsk_ring_cons__release(&xsk->umem->cq, completed);
-        xsk->outstanding_tx -= completed < xsk->outstanding_tx ?
-            completed : xsk->outstanding_tx;
-    }
-}
-
-#endif

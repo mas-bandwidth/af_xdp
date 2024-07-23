@@ -117,64 +117,30 @@ DONE
 		    return xsk->umem_frame_free;
 		}
 
+	It's simple enough. Adapted it and moving on.
+
 TODO
 
-	
+	Get everything compiling, linking and running.
 
+	----------
 
+	Work out how to allocate the frame for sending. I need to do this because I'm not working in-place responding to a packet zero copy.
 
+	Actually construct the packet to send.
 
+	Verify I receive the packets on the server-side.
 
+	----------
 
+	Pin to core 0.
 
+	----------
 
+	Implement stats:
 
+		Number of packets sent on client
 
+		Number of packets received on client
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	--------------
-
-	Count how many packets per-second are being sent, and how many are being received.
-
-	Print out out once per-second.
-
-	Is it possible to spread packets across multiple RSS queues without having 64 machines?
-
-	Verify I can receive millions of reflected packets...
+	----------
