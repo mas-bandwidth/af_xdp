@@ -19,8 +19,9 @@
 #include <xdp/libxdp.h>
 #include <sys/resource.h>
 #include <stdlib.h>
-
 #include <arpa/inet.h>
+#include <linux/ip.h>
+#include <linux/udp.h>
 #include <net/if.h>
 #include <linux/if_link.h>
 #include <linux/if_ether.h>
