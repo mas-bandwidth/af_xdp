@@ -158,6 +158,10 @@ int client_init( struct client_t * client, const char * interface_name )
         return 1;
     }
 
+    // pin to CPU 0
+
+    pin_thread_to_cpu( 0 );
+
     // allocate buffer for umem
 
     const int buffer_size = NUM_FRAMES * FRAME_SIZE;
@@ -289,6 +293,21 @@ void client_free_frame( struct client_t * client, uint64_t frame )
     assert( client->num_frames < NUM_FRAMES );
     client->frames[client->num_frames] = frame;
     client->num_frames++;
+}
+
+int pin_thread_to_cpu( int cpu ) 
+{
+    int num_cpus = sysconf( _SC_NPROCESSORS_ONLN );
+    if ( cpu < 0 || cpu >= num_cpus  )
+        return EINVAL;
+
+    cpu_set_t cpuset;
+    CPU_ZERO( &cpuset );
+    CPU_SET( cpu, &cpuset );
+
+    pthread_t current_thread = pthread_self();    
+
+    return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
 }
 
 uint16_t ipv4_checksum( const void * data, size_t hdr_len )
