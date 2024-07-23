@@ -293,16 +293,14 @@ void client_free_frame( struct client_t * client, uint64_t frame )
 
 void client_generate_packet( void * data, int payload_bytes )
 {
-
-
     struct ethhdr * eth = data;
     struct iphdr  * ip  = data + sizeof( struct ethhdr );
     struct udphdr * udp = (void*) ip + sizeof( struct iphdr );
 
     // generate ethernet header
 
-    memcpy( eth->h_dest, SERVER_ETHERNET_ADDRESS );
-    memcpy( eth->h_source, CLIENT_ETHERNET_ADDRESS );
+    memcpy( eth->h_dest, SERVER_ETHERNET_ADDRESS, ETH_ALEN );
+    memcpy( eth->h_source, CLIENT_ETHERNET_ADDRESS, ETH_ALEN );
     eth->h_proto = ETH_P_IP;
 
     // generate ip header
@@ -313,7 +311,7 @@ void client_generate_packet( void * data, int payload_bytes )
     ip->id       = 0;
     ip->frag_off = htons(0x4000);
     ip->ttl      = 64;
-    ip->tot_len  = htons(sizeof(struct iphdr) + sizeof(struct udphdr) + 0 );    // todo: + payload length here?
+    ip->tot_len  = htons(sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes );
     ip->protocol = IPPROTO_UDP;
     ip->saddr    = CLIENT_IPV4_ADDRESS;
     ip->daddr    = SERVER_IPV4_ADDRESS;
@@ -326,12 +324,17 @@ void client_generate_packet( void * data, int payload_bytes )
 
     udp->source  = CLIENT_PORT;
     udp->dest    = SERVER_PORT;
-    udp->len     = htons(sizeof(struct udphdr) + 0 );       // todo: + payload length here?
+    udp->len     = htons(sizeof(struct udphdr) + payload_bytes );
     udp->check   = 0;
 
     // generate udp payload
 
-    // ...
+    uint8_t * payload = (void*) udp + sizeof( struct udphdr );
+
+    for ( int i = 0; i < payload_bytes; i++ )
+    {
+        payload[i] = i;
+    }
 }
 
 void client_update( struct client_t * client )
