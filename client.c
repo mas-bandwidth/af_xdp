@@ -25,6 +25,8 @@
 #include <net/if.h>
 #include <linux/if_link.h>
 #include <linux/if_ether.h>
+#include <pthread.h>
+#include <sched.h>
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
