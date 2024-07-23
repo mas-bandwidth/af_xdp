@@ -48,9 +48,126 @@ DONE
 
 	Clean up the xsk socket on destroy
 
+	Direct RSS to queue 0
+
+		sudo ethtool -N enp8s0f0 flow-type udp4 action 0
+
+    Wrap my head around exactly what is going on with the ring buffers
+
+    The example code shows a system which processes received packets, and if valid, responds 1:1 with a packet.
+
+    As such it's a system driven by packet receives, it reuses the frame for the received packet when it sends a response.
+
+    My system needs to be different, it's about sending packets. The actual receives could be done inside the xdp program (and probably should)
+
+    In a future article I could write an example that combines sending and receiving.
+
+    This example would just demonstrate how to do the sends?
+
+    The receives are done in batches, which seems like a concern when the system may only have one client connected to it: RX_BATCH_SIZE
+
+	Study the simple allocator. What exactly are they doing? It seems overly simplistic...
+
+	If I'm not allowing receives through the system, then I can drive by sends -- this could simplify the allocation of frames?
+
+	arp command on linux to get arp table (address resolution protocol, eg. get ethernet address for given ip address)
+
+	https://www.geeksforgeeks.org/arp-command-in-linux-with-examples/?ref=lbp
+
+	Work out strategy to send packets. 
+
+	I think it can just be a rolling index modulo MAX_FRAMES?
+
+	Stop if the current frame is not completed yet.
+
+	Need to implement completion for sends to mark frames as free to use for send.
+
+	Doesn't seem hard.
+
+	Actually, it seems that the way the stuff works is that you have an array of free frames.
+
+	You setup these free frames initially, and when you have sends complete, you add the frame back into the free array.
+
+	I think the way the APIs work, they require passing in the free frames array -- otherwise, I'd use the rolling index
+
+	Double check this...
+
+	This code does the simple array of free frames
+
+		static uint64_t xsk_alloc_umem_frame(struct xsk_socket_info *xsk)
+		{
+		    uint64_t frame;
+		    if (xsk->umem_frame_free == 0)
+		        return INVALID_UMEM_FRAME;
+
+		    frame = xsk->umem_frame_addr[--xsk->umem_frame_free];
+		    xsk->umem_frame_addr[xsk->umem_frame_free] = INVALID_UMEM_FRAME;
+		    return frame;
+		}
+
+		static void xsk_free_umem_frame(struct xsk_socket_info *xsk, uint64_t frame)
+		{
+		    assert(xsk->umem_frame_free < NUM_FRAMES);
+
+		    xsk->umem_frame_addr[xsk->umem_frame_free++] = frame;
+		}
+
+		static uint64_t xsk_umem_free_frames(struct xsk_socket_info *xsk)
+		{
+		    return xsk->umem_frame_free;
+		}
+
 TODO
 
-	...
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	--------------
 
