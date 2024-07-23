@@ -26,11 +26,25 @@
 #include <linux/if_link.h>
 #include <linux/if_ether.h>
 
-#define NUM_FRAMES         4096
+const char * INTERFACE_NAME = "enp8s0f0";
 
-#define FRAME_SIZE         XSK_UMEM__DEFAULT_FRAME_SIZE
+const uint8_t CLIENT_ETHERNET_ADDRESS[] = { 0xa0, 0x36, 0x9f, 0x68, 0xeb, 0x98 };
 
-#define INVALID_FRAME      UINT64_MAX
+const uint8_t SERVER_ETHERNET_ADDRESS[] = { 0xa0, 0x36, 0x9f, 0x1e, 0x1a, 0xec };
+
+const uint32_t CLIENT_IPV4_ADDRESS = 0xc0a8b779; // 192.168.183.121
+
+const uint32_t SERVER_IPV4_ADDRESS = 0xc0a8b77c; // 192.168.183.124
+
+const uint16_t SERVER_PORT = 40000;
+
+const uint16_t CLIENT_PORT = 40000;
+
+#define NUM_FRAMES 4096
+
+#define FRAME_SIZE XSK_UMEM__DEFAULT_FRAME_SIZE
+
+#define INVALID_FRAME UINT64_MAX
 
 struct client_t
 {
@@ -277,6 +291,49 @@ void client_free_frame( struct client_t * client, uint64_t frame )
     client->num_frames++;
 }
 
+void client_generate_packet( void * data, int payload_bytes )
+{
+
+
+    struct ethhdr * eth = data;
+    struct iphdr  * ip  = data + sizeof( struct ethhdr );
+    struct udphdr * udp = (void*) ip + sizeof( struct iphdr );
+
+    // generate ethernet header
+
+    memcpy( eth->h_dest, SERVER_ETHERNET_ADDRESS );
+    memcpy( eth->h_source, CLIENT_ETHERNET_ADDRESS );
+    eth->h_proto = ETH_P_IP;
+
+    // generate ip header
+
+    ip->ihl      = 5;
+    ip->version  = 4;
+    ip->tos      = 0x0;
+    ip->id       = 0;
+    ip->frag_off = htons(0x4000);
+    ip->ttl      = 64;
+    ip->tot_len  = htons(sizeof(struct iphdr) + sizeof(struct udphdr) + 0 );    // todo: + payload length here?
+    ip->protocol = IPPROTO_UDP;
+    ip->saddr    = CLIENT_IPV4_ADDRESS;
+    ip->daddr    = SERVER_IPV4_ADDRESS;
+    ip->check    = 0; 
+
+    // todo: bring across checksum
+    // ip->check    = inet_csum(ip, sizeof(struct iphdr));
+
+    // generate udp header
+
+    udp->source  = CLIENT_PORT;
+    udp->dest    = SERVER_PORT;
+    udp->len     = htons(sizeof(struct udphdr) + 0 );       // todo: + payload length here?
+    udp->check   = 0;
+
+    // generate udp payload
+
+    // ...
+}
+
 void client_update( struct client_t * client )
 {
     // queue up packets in transmit queue
@@ -329,13 +386,7 @@ int main( int argc, char *argv[] )
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
 
-    const char * interface_name = "enp8s0f0";   // vision 10G NIC
-
-    const uint32_t server_address = 0xC0A8B77C; // 192.168.183.124
-
-    const uint16_t server_port = 40000;
-
-    if ( client_init( &client, interface_name ) != 0 )
+    if ( client_init( &client, INTERFACE_NAME ) != 0 )
     {
         cleanup();
         return 1;
@@ -344,8 +395,6 @@ int main( int argc, char *argv[] )
     while ( !quit )
     {
         client_update( &client);
-
-        usleep( 1000000 );
     }
 
     cleanup();
