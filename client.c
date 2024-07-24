@@ -370,6 +370,7 @@ void client_update( struct client_t * client )
 {
     // queue packets to send
 
+/*
     while ( true )
     {
         uint64_t frame = client_alloc_frame( client );
@@ -384,6 +385,7 @@ void client_update( struct client_t * client )
         // todo: temporary -- free the frame since we don't queue for send yet
         client_free_frame( client, frame );
     }
+*/
 
     // todo: grab all the frames and fill them with packets to send, send it all in one batch
 
