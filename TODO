@@ -133,13 +133,13 @@ DONE
 
 	Pin client to run on core 0.
 
-TODO
-
 	Instead of constructing a single packet, I should construct a batch of packets to send, eg. grab all the free frames for send, iterate across, and gen them in one go
 
 	And then make one syscall to send them
+
+	Set the batch size to be configurable. Default it to 256.
 		
-	----------
+TODO
 
 	Verify I receive the packets on the server-side.
 
