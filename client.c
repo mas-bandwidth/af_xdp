@@ -46,6 +46,8 @@ const uint16_t CLIENT_PORT = 40000;
 
 const int PAYLOAD_BYTES = 100;
 
+const int SEND_BATCH_SIZE = 256;
+
 #define NUM_FRAMES 4096
 
 #define FRAME_SIZE XSK_UMEM__DEFAULT_FRAME_SIZE
@@ -373,8 +375,8 @@ void client_update( struct client_t * client )
     // queue packets to send
 
     int num_packets = 0;
-    uint64_t packet_address[NUM_FRAMES];
-    int packet_length[NUM_FRAMES];
+    uint64_t packet_address[SEND_BATCH_SIZE];
+    int packet_length[SEND_BATCH_SIZE];
 
     while ( true )
     {
@@ -389,6 +391,9 @@ void client_update( struct client_t * client )
         packet_length[num_packets] = client_generate_packet( packet, PAYLOAD_BYTES );
 
         num_packets++;
+
+        if ( num_packets == SEND_BATCH_SIZE )
+            break;
     }
 
     int send_index;
