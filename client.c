@@ -376,7 +376,7 @@ void client_update( struct client_t * client )
         if ( frame == INVALID_FRAME )
             break;
 
-        uint8_t * packet = client->umem + frame;
+        uint8_t * packet = client->buffer + frame;
 
         client_generate_packet( packet, PAYLOAD_BYTES );
 
