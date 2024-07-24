@@ -403,8 +403,8 @@ void client_update( struct client_t * client )
     for ( int i = 0; i < num_packets; i++ )
     {
         struct xdp_desc * desc = xsk_ring_prod__tx_desc( &client->send_queue, send_index + i );
-        desc->addr = packet_data[i];
-        desc->len = packet_bytes[i];
+        desc->addr = packet_address[i];
+        desc->len = packet_length[i];
     }
 
     xsk_ring_prod__submit( &client->send_queue, num_packets );
