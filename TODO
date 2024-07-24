@@ -141,11 +141,11 @@ DONE
 		
 TODO
 
-	Verify I receive the packets on the server-side.
+	Verify that the server receives packets sent from the client.
 
 	----------
 
-	Verify that I receive packets from the server on the client (reflected)
+	Verify that the client receives reflected packets back from the server.
 
 	----------
 

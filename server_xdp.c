@@ -32,7 +32,7 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
-//#define DEBUG 1
+#define DEBUG 1
 
 #if DEBUG
 #define debug_printf bpf_printk
@@ -103,9 +103,13 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                         if ( udp->dest == __constant_htons(40000) )
                         {
                             void * payload = (void*) udp + sizeof(struct udphdr);
+
                             int payload_bytes = data_end - payload;
+
                             debug_printf( "reflecting %d byte udp packet", payload_bytes );
+
                             reflect_packet( data, payload_bytes );
+
                             return XDP_TX;
                         }
                     }

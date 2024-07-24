@@ -102,7 +102,11 @@ SEC("client_xdp") int client_xdp_filter( struct xdp_md *ctx )
                     {
                         if ( udp->dest == __constant_htons(40000) )
                         {
-                            // todo: counter for received packets
+                            void * payload = (void*) udp + sizeof(struct udphdr);
+
+                            int payload_bytes = data_end - payload;
+
+                            debug_printf( "client received %d byte packet", payload_bytes );
                         }
                     }
                 }

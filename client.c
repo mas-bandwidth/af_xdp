@@ -46,7 +46,7 @@ const uint16_t CLIENT_PORT = 40000;
 
 const int PAYLOAD_BYTES = 100;
 
-const int SEND_BATCH_SIZE = 256;
+const int SEND_BATCH_SIZE = 1; // 256;
 
 #define NUM_FRAMES 4096
 
@@ -344,7 +344,7 @@ int client_generate_packet( void * data, int payload_bytes )
     ip->id       = 0;
     ip->frag_off = htons(0x4000);
     ip->ttl      = 64;
-    ip->tot_len  = htons(sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes );
+    ip->tot_len  = htons( sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes );
     ip->protocol = IPPROTO_UDP;
     ip->saddr    = CLIENT_IPV4_ADDRESS;
     ip->daddr    = SERVER_IPV4_ADDRESS;
@@ -355,7 +355,7 @@ int client_generate_packet( void * data, int payload_bytes )
 
     udp->source  = CLIENT_PORT;
     udp->dest    = SERVER_PORT;
-    udp->len     = htons(sizeof(struct udphdr) + payload_bytes );
+    udp->len     = htons( sizeof(struct udphdr) + payload_bytes );
     udp->check   = 0;
 
     // generate udp payload
@@ -451,6 +451,9 @@ int main( int argc, char *argv[] )
     while ( !quit )
     {
         client_update( &client);
+
+        // todo: temporary
+        usleep( 1000000 );
     }
 
     cleanup();
