@@ -62,6 +62,7 @@ struct client_t
     struct xsk_umem * umem;
     struct xsk_ring_prod send_queue;
     struct xsk_ring_cons complete_queue;
+    struct xsk_ring_cons fill_queue;
     struct xsk_socket * xsk;
     uint64_t frames[NUM_FRAMES];
     uint32_t num_frames;
@@ -189,7 +190,7 @@ int client_init( struct client_t * client, const char * interface_name )
 
     // allocate umem
 
-    ret = xsk_umem__create( &client->umem, client->buffer, buffer_size, NULL, &client->complete_queue, NULL );
+    ret = xsk_umem__create( &client->umem, client->buffer, buffer_size, &client->fill_queue, &client->complete_queue, NULL );
     if ( ret ) 
     {
         printf( "\nerror: could not create umem\n\n" );
