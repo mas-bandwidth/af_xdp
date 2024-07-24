@@ -128,7 +128,7 @@ int client_init( struct client_t * client, const char * interface_name )
 
         if ( !found )
         {
-            printf( "\nerror: could not find any network interface matching '%s'", interface_name );
+            printf( "\nerror: could not find any network interface matching '%s'\n\n", interface_name );
             return 1;
         }
     }
@@ -395,10 +395,13 @@ void client_update( struct client_t * client )
     int result = xsk_ring_prod__reserve( &client->send_queue, num_packets, &send_index );
     if ( result != 1) 
     {
-        // todo
         printf( "warning: failed to reserve entries in send queue ring buffer\n" );
+        // todo
+        exit(1);
         return;
     }
+
+    printf( "ring buffer success\n" );
 
     for ( int i = 0; i < num_packets; i++ )
     {
