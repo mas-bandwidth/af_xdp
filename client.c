@@ -62,7 +62,7 @@ struct client_t
     struct xsk_umem * umem;
     struct xsk_ring_prod send_queue;
     struct xsk_ring_cons complete_queue;
-    struct xsk_ring_cons fill_queue;
+    struct xsk_ring_prod fill_queue;
     struct xsk_socket * xsk;
     uint64_t frames[NUM_FRAMES];
     uint32_t num_frames;
@@ -298,20 +298,20 @@ void client_free_frame( struct client_t * client, uint64_t frame )
     client->num_frames++;
 }
 
-uint16_t ipv4_checksum( const void * data, size_t hdr_len )
+uint16_t ipv4_checksum( const void * data, size_t header_length )
 {
     unsigned long sum = 0;
 
     const uint16_t * p = (const uint16_t*) data;
 
-    while ( hdr_len > 1 )
+    while ( header_length > 1 )
     {
         sum += *p++;
         if ( sum & 0x80000000 )
         {
             sum = ( sum & 0xFFFF ) + ( sum >> 16 );
         }
-        hdr_len -= 2;
+        header_length -= 2;
     }
 
     while ( sum >> 16 )
@@ -368,7 +368,7 @@ void client_generate_packet( void * data, int payload_bytes )
 
 void client_update( struct client_t * client )
 {
-    // queue up packets in transmit queue
+    // queue packets to send
 
     while ( true )
     {
@@ -404,7 +404,7 @@ void client_update( struct client_t * client )
 
     sendto( xsk_socket__fd( client->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
 
-    // mark completed send frames as free
+    // mark completed sent packet frames as free to be reused
 
     uint32_t complete_index;
 
