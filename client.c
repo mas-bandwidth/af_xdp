@@ -334,7 +334,7 @@ int client_generate_packet( void * data, int payload_bytes )
 
     memcpy( eth->h_dest, SERVER_ETHERNET_ADDRESS, ETH_ALEN );
     memcpy( eth->h_source, CLIENT_ETHERNET_ADDRESS, ETH_ALEN );
-    eth->h_proto = ETH_P_IP;
+    eth->h_proto = htons( ETH_P_IP );
 
     // generate ip header
 
