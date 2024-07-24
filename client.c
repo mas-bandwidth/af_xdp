@@ -398,7 +398,7 @@ void client_update( struct client_t * client )
 
     int send_index;
     int result = xsk_ring_prod__reserve( &client->send_queue, num_packets, &send_index );
-    if ( result != 1) 
+    if ( result != num_packets ) 
     {
         printf( "warning: failed to reserve entries in send queue ring buffer\n" );
         // todo
