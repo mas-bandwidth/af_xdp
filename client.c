@@ -322,7 +322,7 @@ uint16_t ipv4_checksum( const void * data, size_t header_length )
     return ~sum;
 }
 
-void client_generate_packet( void * data, int payload_bytes )
+int client_generate_packet( void * data, int payload_bytes )
 {
     struct ethhdr * eth = data;
     struct iphdr  * ip  = data + sizeof( struct ethhdr );
@@ -364,11 +364,17 @@ void client_generate_packet( void * data, int payload_bytes )
     {
         payload[i] = i;
     }
+
+    return sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(udphdr) + PAYLOAD_BYTES; 
 }
 
 void client_update( struct client_t * client )
 {
     // queue packets to send
+
+    int num_packets = 0;
+    uint64_t packet_address[MAX_FRAMES];
+    int packet_length[MAX_FRAMES];
 
     while ( true )
     {
@@ -379,25 +385,29 @@ void client_update( struct client_t * client )
 
         uint8_t * packet = client->buffer + frame;
 
-        client_generate_packet( packet, PAYLOAD_BYTES );
+        packet_address[num_packets] = frame;
+        packet_length[num_packets] = client_generate_packet( packet, PAYLOAD_BYTES );
+
+        num_packets++;
     }
 
-    // todo: grab all the frames and fill them with packets to send, send it all in one batch
-
-    /*
     int send_index;
-    int result = xsk_ring_prod__reserve( &client->send_queue, 1, &send_index );     // todo n descs, not 1
+    int result = xsk_ring_prod__reserve( &client->send_queue, num_packets, &send_index );
     if ( result != 1) 
     {
+        // todo
+        printf( "warning: failed to reserve entries in send queue ring buffer\n" );
         return;
     }
 
-    // todo: walk and fill up n descs
-    xsk_ring_prod__tx_desc( &client->send_queue, send_index )->addr = addr;
-    xsk_ring_prod__tx_desc( &client->send_queue, send_index )->len = len;
+    for ( int i = 0; i < num_packets; i++ )
+    {
+        struct xdp_desc * desc = xsk_ring_prod__tx_desc( &client->send_queue, send_index + i );
+        desc->addr = packet_data[i];
+        desc->len = packet_bytes[i];
+    }
 
-    xsk_ring_prod__submit( &client->send_queue, 1 );    // todo: count of packets to send
-    */
+    xsk_ring_prod__submit( &client->send_queue, num_packets );
 
     // send queued packets
 
