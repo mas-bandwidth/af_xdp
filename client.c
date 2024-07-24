@@ -62,7 +62,7 @@ struct client_t
     struct xsk_umem * umem;
     struct xsk_ring_prod send_queue;
     struct xsk_ring_cons complete_queue;
-    struct xsk_ring_prod fill_queue;
+    struct xsk_ring_prod fill_queue; // not used
     struct xsk_socket * xsk;
     uint64_t frames[NUM_FRAMES];
     uint32_t num_frames;
@@ -385,16 +385,18 @@ void client_update( struct client_t * client )
     // todo: grab all the frames and fill them with packets to send, send it all in one batch
 
     /*
-        ret = xsk_ring_prod__reserve( &xsk->tx, 1, &tx_idx );
-        if (ret != 1) {
-            // No more transmit slots, drop the packet
-            return false;
-        }
+    int send_index;
+    int result = xsk_ring_prod__reserve( &client->send_queue, 1, &send_index );     // todo n descs, not 1
+    if ( result != 1) 
+    {
+        return;
+    }
 
-        xsk_ring_prod__tx_desc(&xsk->tx, tx_idx)->addr = addr;
-        xsk_ring_prod__tx_desc(&xsk->tx, tx_idx)->len = len;
+    // todo: walk and fill up n descs
+    xsk_ring_prod__tx_desc( &client->send_queue, send_index )->addr = addr;
+    xsk_ring_prod__tx_desc( &client->send_queue, send_index )->len = len;
 
-        xsk_ring_prod__submit(&xsk->tx, 1);
+    xsk_ring_prod__submit( &client->send_queue, 1 );    // todo: count of packets to send
     */
 
     // send queued packets
