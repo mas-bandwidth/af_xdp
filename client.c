@@ -6,6 +6,8 @@
     Derived from https://github.com/xdp-project/xdp-tutorial/tree/master/advanced03-AF_XDP
 */
 
+#define _GNU_SOURCE
+
 #include <memory.h>
 #include <stdio.h>
 #include <signal.h>
@@ -27,10 +29,6 @@
 #include <linux/if_ether.h>
 #include <pthread.h>
 #include <sched.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <assert.h>
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
