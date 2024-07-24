@@ -383,7 +383,12 @@ void client_update( struct client_t * client )
         uint64_t frame = client_alloc_frame( client );
 
         if ( frame == INVALID_FRAME )
+        {
+            printf( "invalid frame\n" );
             break;
+        }
+
+        printf( "queue packet to send\n" );
 
         uint8_t * packet = client->buffer + frame;
 
@@ -413,6 +418,8 @@ void client_update( struct client_t * client )
 
     xsk_ring_prod__submit( &client->send_queue, num_packets );
 
+    printf( "sent %d packets\n", num_packets );
+
     // send queued packets
 
     sendto( xsk_socket__fd( client->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
@@ -425,8 +432,12 @@ void client_update( struct client_t * client )
 
     if ( completed > 0 ) 
     {
+        printf( "%d completed packet sends\n", num_packets );
+
         for ( int i = 0; i < completed; i++ )
         {
+            printf( "free sent packet\n" );
+
             client_free_frame( client, *xsk_ring_cons__comp_addr( &client->complete_queue, complete_index++ ) );
         }
 
