@@ -353,8 +353,8 @@ int client_generate_packet( void * data, int payload_bytes )
 
     // generate udp header
 
-    udp->source  = CLIENT_PORT;
-    udp->dest    = SERVER_PORT;
+    udp->source  = htons( CLIENT_PORT );
+    udp->dest    = htons( SERVER_PORT );
     udp->len     = htons( sizeof(struct udphdr) + payload_bytes );
     udp->check   = 0;
 
