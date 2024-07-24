@@ -365,7 +365,7 @@ int client_generate_packet( void * data, int payload_bytes )
         payload[i] = i;
     }
 
-    return sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(udphdr) + PAYLOAD_BYTES; 
+    return sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes; 
 }
 
 void client_update( struct client_t * client )
@@ -373,8 +373,8 @@ void client_update( struct client_t * client )
     // queue packets to send
 
     int num_packets = 0;
-    uint64_t packet_address[MAX_FRAMES];
-    int packet_length[MAX_FRAMES];
+    uint64_t packet_address[NUM_FRAMES];
+    int packet_length[NUM_FRAMES];
 
     while ( true )
     {
