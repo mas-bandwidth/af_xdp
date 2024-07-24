@@ -60,8 +60,6 @@ struct client_t
     struct xsk_umem * umem;
     struct xsk_ring_prod send_queue;
     struct xsk_ring_cons complete_queue;
-    struct xsk_ring_cons receive_queue;
-    struct xsk_ring_prod fill_queue;
     struct xsk_socket * xsk;
     uint64_t frames[NUM_FRAMES];
     uint32_t num_frames;
@@ -177,10 +175,6 @@ int client_init( struct client_t * client, const char * interface_name )
         return 1;
     }
 
-    // pin to CPU 0
-
-    pin_thread_to_cpu( 0 );
-
     // allocate buffer for umem
 
     const int buffer_size = NUM_FRAMES * FRAME_SIZE;
@@ -193,30 +187,20 @@ int client_init( struct client_t * client, const char * interface_name )
 
     // allocate umem
 
-    ret = xsk_umem__create( &client->umem, client->buffer, buffer_size, &client->fill_queue, &client->complete_queue, NULL );
+    ret = xsk_umem__create( &client->umem, client->buffer, buffer_size, NULL, &client->complete_queue, NULL );
     if ( ret ) 
     {
         printf( "\nerror: could not create umem\n\n" );
         return 1;
     }
 
-    // get the xks_map file handle
-
-    struct bpf_map * map = bpf_object__find_map_by_name( xdp_program__bpf_obj( client->program ), "xsks_map" );
-    int xsk_map_fd = bpf_map__fd( map );
-    if ( xsk_map_fd < 0 ) 
-    {
-        printf( "\nerror: no xsks map found\n\n" );
-        return 1;
-    }
-
-    // create xsk socket
+    // create xsk socket and assign to queue 0
 
     struct xsk_socket_config xsk_config;
 
     memset( &xsk_config, 0, sizeof(xsk_config) );
 
-    xsk_config.rx_size = XSK_RING_CONS__DEFAULT_NUM_DESCS;
+    xsk_config.rx_size = 0;
     xsk_config.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
     xsk_config.xdp_flags = 0;
     xsk_config.bind_flags = 0;
@@ -224,19 +208,16 @@ int client_init( struct client_t * client, const char * interface_name )
 
     int queue_id = 0;
 
-    ret = xsk_socket__create( &client->xsk, interface_name, queue_id, client->umem, &client->receive_queue, &client->send_queue, &xsk_config );
+    ret = xsk_socket__create( &client->xsk, interface_name, queue_id, client->umem, NULL, &client->send_queue, &xsk_config );
     if ( ret )
     {
         printf( "\nerror: could not create xsk socket\n\n" );
         return 1;
     }
 
-    ret = xsk_socket__update_xskmap( client->xsk, xsk_map_fd );
-    if ( ret )
-    {
-        printf( "\nerror: could not update xskmap\n\n" );
-        return 1;
-    }
+    // pin this thread to CPU 0 so it matches the queue id
+
+    pin_thread_to_cpu( 0 );
 
     // initialize frame allocator
 
@@ -386,14 +367,28 @@ void client_update( struct client_t * client )
 {
     // queue up packets in transmit queue
 
+    int num_packets = 0;
+
+    uint64_t 
+
+    while ( true )
+    {
+        uint64_t frame = client_alloc_frame( client );
+
+        if ( frame == INVALID_FRAME )
+            break;
+
+        uint8_t * packet = client->umem + frame;
+
+        client_generate_packet( packet, PAYLOAD_BYTES );
+
+        // todo: stuff
+    }
+
     // todo: grab all the frames and fill them with packets to send, send it all in one batch
 
     /*
-        // Here we sent the packet out of the receive port. Note that
-        // we allocate one entry and schedule it. Your design would be
-        // faster if you do batch processing/transmission
-
-        ret = xsk_ring_prod__reserve(&xsk->tx, 1, &tx_idx);
+        ret = xsk_ring_prod__reserve( &xsk->tx, 1, &tx_idx );
         if (ret != 1) {
             // No more transmit slots, drop the packet
             return false;
@@ -401,8 +396,8 @@ void client_update( struct client_t * client )
 
         xsk_ring_prod__tx_desc(&xsk->tx, tx_idx)->addr = addr;
         xsk_ring_prod__tx_desc(&xsk->tx, tx_idx)->len = len;
+
         xsk_ring_prod__submit(&xsk->tx, 1);
-        xsk->outstanding_tx++;
     */
 
     // send queued packets
