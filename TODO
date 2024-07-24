@@ -139,20 +139,14 @@ DONE
 
 	Set the batch size to be configurable. Default it to 256.
 		
-TODO
-
 	Verify that the server receives packets sent from the client.
 
-	----------
+	Verify that the client receives reflected packets back from the server
 
-	Verify that the client receives reflected packets back from the server.
+TODO
 
-	----------
+	Number of packets sent on client (drive from AF_XDP) -- atomic
 
-	Implement stats:
+	Number of packets received on client (drive from XDP program) -- atomic
 
-		Number of packets sent on client (drive from AF_XDP)
-
-		Number of packets received on client (drive from XDP program)
-
-	----------
+	Print out stats once per-second on custom thread.
