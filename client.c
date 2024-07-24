@@ -27,6 +27,10 @@
 #include <linux/if_ether.h>
 #include <pthread.h>
 #include <sched.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <assert.h>
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
