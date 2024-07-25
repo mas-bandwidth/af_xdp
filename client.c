@@ -96,7 +96,7 @@ static void * stats_thread( void * arg )
             break;
         }
 
-        printf( "sent %" PRId64 ", received %" PRId64 "\n", client->sent_packets, received_packets[0] );
+        printf( "sent %" PRId64 ", received %" PRId64 "\n", client->num_packets_sent, received_packets[0] );
     }
 
 /*
