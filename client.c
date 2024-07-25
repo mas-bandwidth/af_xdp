@@ -81,8 +81,6 @@ static void * stats_thread( void * arg )
 {
     struct client_t * client = (struct client_t*) arg;
 
-    unsigned int num_cpus = libbpf_num_possible_cpus();
-
     while ( !quit )
     {
         usleep( 1000000 );

@@ -177,6 +177,8 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
+    unsigned int num_cpus = libbpf_num_possible_cpus();
+
     while ( !quit )
     {
         usleep( 1000000 );
