@@ -69,7 +69,42 @@ struct client_t
     uint64_t frames[NUM_FRAMES];
     uint32_t num_frames;
     uint64_t num_packets_sent;
+    pthread_t stats_thread;
+    int received_packets_fd;
 };
+
+volatile bool quit;
+
+static void * stats_thread( void * arg )
+{
+    while ( !quit )
+    {
+        usleep( 1000000 );
+
+        __u64 received_packets[num_cpus];
+        int key = 0;
+        if ( bpf_map_lookup_elem( bpf.received_packets_fd, &key, values ) != 0 ) 
+        {
+            printf( "\nerror: could not look up received packets map: %s\n\n", strerror( errno ) );
+            quit = true;
+            break;
+        }
+
+        printf( "sent %" PRId64 ", received %" PRId64 "\n", client->sent_packets, received_packets[0] );
+    }
+
+/*
+        uint64_t input_delta = current_processed_inputs - previous_processed_inputs;
+        uint64_t player_state_delta = current_player_state_packets_sent - previous_player_state_packets_sent;
+        uint64_t lost_delta = current_lost_inputs - previous_lost_inputs;
+        printf( "input delta: %" PRId64 ", player state delta: %" PRId64 ", lost delta: %" PRId64 "\n", input_delta, player_state_delta, lost_delta );
+        previous_processed_inputs = current_processed_inputs;
+        previous_player_state_packets_sent = current_player_state_packets_sent;
+        previous_lost_inputs = current_lost_inputs;
+*/
+
+    return NULL;
+}
 
 bool pin_thread_to_cpu( int cpu ) 
 {
@@ -234,6 +269,24 @@ int client_init( struct client_t * client, const char * interface_name )
 
     client->num_frames = NUM_FRAMES;
 
+    // look up receive packets map
+
+    client->received_packets_fd = bpf_obj_get( "/sys/fs/bpf/received_packets_map" );
+    if ( bpf->received_packets_fd <= 0 )
+    {
+        printf( "\nerror: could not get received packets map: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
+    // create stats thread
+
+    ret = pthread_create( &client->stats_thread, NULL, stats_thread, client );
+    if ( ret ) 
+    {
+        printf( "\nerror: could not create stats thread\n\n" );
+        return 1;
+    }
+
     return 0;
 }
 
@@ -264,8 +317,6 @@ void client_shutdown( struct client_t * client )
 }
 
 static struct client_t client;
-
-volatile bool quit;
 
 void interrupt_handler( int signal )
 {
@@ -437,7 +488,7 @@ void client_update( struct client_t * client )
     }
 }
 
-int main( int argc, char *argv[] )
+int main( int argc, char * argv[] )
 {
     printf( "\n[client]\n" );
 

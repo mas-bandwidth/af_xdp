@@ -143,13 +143,17 @@ DONE
 
 	Verify that the client receives reflected packets back from the server
 
-TODO
-
 	Number of packets sent on client (drive from AF_XDP) -- atomic
 
 	Number of packets received on client (drive from XDP program) -- atomic
 
+	Create a stats thread
+
 	Print out stats once per-second on stats thread.
+
+TODO
+
+	Convert stats to accum version so we can see sent and received per-second.
 
 	------------
 
@@ -170,5 +174,5 @@ TODO
 	The same lie needs to be done by the server -> client on reflecting the packet. lie about the source address
 
 	Then the client will also receive packets across all receive queues
-	
+
 	------------
