@@ -116,8 +116,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // look up receive packets map
 
-    client->received_packets_fd = bpf_obj_get( "/sys/fs/bpf/received_packets_map" );
-    if ( client->received_packets_fd <= 0 )
+    server->received_packets_fd = bpf_obj_get( "/sys/fs/bpf/received_packets_map" );
+    if ( server->received_packets_fd <= 0 )
     {
         printf( "\nerror: could not get received packets map: %s\n\n", strerror(errno) );
         return 1;
@@ -187,7 +187,7 @@ int main( int argc, char *argv[] )
 
         __u64 thread_received_packets[num_cpus];
         int key = 0;
-        if ( bpf_map_lookup_elem( client->received_packets_fd, &key, thread_received_packets ) != 0 ) 
+        if ( bpf_map_lookup_elem( server->received_packets_fd, &key, thread_received_packets ) != 0 ) 
         {
             printf( "\nerror: could not look up received packets map: %s\n\n", strerror( errno ) );
             quit = true;
