@@ -128,7 +128,7 @@ int server_init( struct server_t * server, const char * interface_name )
 
 void bpf_shutdown( struct server_t * server )
 {
-    assert( servevr );
+    assert( server );
 
     if ( server->program != NULL )
     {
