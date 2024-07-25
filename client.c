@@ -46,7 +46,7 @@ const uint16_t CLIENT_PORT = 40000;
 
 const int PAYLOAD_BYTES = 100;
 
-const int SEND_BATCH_SIZE = 1; // 256;
+const int SEND_BATCH_SIZE = 256;
 
 #define NUM_FRAMES 4096
 
@@ -68,6 +68,7 @@ struct client_t
     struct xsk_socket * xsk;
     uint64_t frames[NUM_FRAMES];
     uint32_t num_frames;
+    uint64_t num_packets_sent;
 };
 
 bool pin_thread_to_cpu( int cpu ) 
@@ -199,7 +200,7 @@ int client_init( struct client_t * client, const char * interface_name )
         return 1;
     }
 
-    // create xsk socket and assign to queue 0
+    // create xsk socket and assign to network interface queue 0
 
     struct xsk_socket_config xsk_config;
 
@@ -383,12 +384,7 @@ void client_update( struct client_t * client )
         uint64_t frame = client_alloc_frame( client );
 
         if ( frame == INVALID_FRAME )
-        {
-            printf( "invalid frame\n" );
             break;
-        }
-
-        printf( "queue packet to send\n" );
 
         uint8_t * packet = client->buffer + frame;
 
@@ -418,8 +414,6 @@ void client_update( struct client_t * client )
 
     xsk_ring_prod__submit( &client->send_queue, num_packets );
 
-    printf( "sent %d packets\n", num_packets );
-
     // send queued packets
 
     sendto( xsk_socket__fd( client->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
@@ -432,16 +426,15 @@ void client_update( struct client_t * client )
 
     if ( completed > 0 ) 
     {
-        printf( "%d completed packet sends\n", num_packets );
-
         for ( int i = 0; i < completed; i++ )
         {
-            printf( "free sent packet\n" );
-
             client_free_frame( client, *xsk_ring_cons__comp_addr( &client->complete_queue, complete_index++ ) );
         }
 
         xsk_ring_cons__release( &client->complete_queue, completed );
+
+        // todo: atomic
+        num_packets_sent += completed;
     }
 }
 
@@ -462,9 +455,6 @@ int main( int argc, char *argv[] )
     while ( !quit )
     {
         client_update( &client);
-
-        // todo: temporary
-        usleep( 1000000 );
     }
 
     cleanup();
