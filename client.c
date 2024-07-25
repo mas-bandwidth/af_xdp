@@ -430,7 +430,7 @@ int client_generate_packet( void * data, int payload_bytes )
 
 void client_update( struct client_t * client )
 {
-    // don't do anything if we don't have enough free packets
+    // don't do anything if we don't have enough free packets to send a batch
 
     if ( client->num_frames < SEND_BATCH_SIZE )
         return;
@@ -439,7 +439,7 @@ void client_update( struct client_t * client )
 
     int send_index;
     int result = xsk_ring_prod__reserve( &client->send_queue, SEND_BATCH_SIZE, &send_index );
-    if ( result != SEND_BATCH_SIZE ) 
+    if ( result == 0 ) 
     {
         return;
     }

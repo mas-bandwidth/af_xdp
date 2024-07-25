@@ -153,6 +153,10 @@ DONE
 
 TODO
 
+	Debug why not seeing packets back from server
+
+	------------
+
 	Convert stats to accum version so we can see sent and received per-second.
 
 	------------
