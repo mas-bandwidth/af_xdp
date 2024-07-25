@@ -77,6 +77,8 @@ volatile bool quit;
 
 static void * stats_thread( void * arg )
 {
+    unsigned int num_cpus = libbpf_num_possible_cpus();
+    
     while ( !quit )
     {
         usleep( 1000000 );
