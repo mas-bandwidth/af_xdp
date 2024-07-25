@@ -433,8 +433,7 @@ void client_update( struct client_t * client )
 
         xsk_ring_cons__release( &client->complete_queue, completed );
 
-        // todo: atomic
-        num_packets_sent += completed;
+        __sync_fetch_and_add( &client->num_packets_sent, completed );
     }
 }
 
