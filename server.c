@@ -20,7 +20,7 @@
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
-struct bpf_t
+struct server_t
 {
     int interface_index;
     struct xdp_program * program;
@@ -29,7 +29,7 @@ struct bpf_t
     int received_packets_fd;
 };
 
-int bpf_init( struct bpf_t * bpf, const char * interface_name )
+int server_init( struct server_t * server, const char * interface_name )
 {
     // we can only run xdp programs as root
 
@@ -58,8 +58,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
                 if ( strcmp( interface_name, iap->ifa_name ) == 0 )
                 {
                     printf( "found network interface: '%s'\n", iap->ifa_name );
-                    bpf->interface_index = if_nametoindex( iap->ifa_name );
-                    if ( !bpf->interface_index ) 
+                    server->interface_index = if_nametoindex( iap->ifa_name );
+                    if ( !server->interface_index ) 
                     {
                         printf( "\nerror: if_nametoindex failed\n\n" );
                         return 1;
@@ -83,8 +83,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     printf( "loading server_xdp...\n" );
 
-    bpf->program = xdp_program__open_file( "server_xdp.o", "server_xdp", NULL );
-    if ( libxdp_get_error( bpf->program ) ) 
+    server->program = xdp_program__open_file( "server_xdp.o", "server_xdp", NULL );
+    if ( libxdp_get_error( server->program ) ) 
     {
         printf( "\nerror: could not load server_xdp program\n\n");
         return 1;
@@ -94,18 +94,18 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     printf( "attaching server_xdp to network interface\n" );
 
-    int ret = xdp_program__attach( bpf->program, bpf->interface_index, XDP_MODE_NATIVE, 0 );
+    int ret = xdp_program__attach( server->program, server->interface_index, XDP_MODE_NATIVE, 0 );
     if ( ret == 0 )
     {
-        bpf->attached_native = true;
+        server->attached_native = true;
     } 
     else
     {
         printf( "falling back to skb mode...\n" );
-        ret = xdp_program__attach( bpf->program, bpf->interface_index, XDP_MODE_SKB, 0 );
+        ret = xdp_program__attach( server->program, server->interface_index, XDP_MODE_SKB, 0 );
         if ( ret == 0 )
         {
-            bpf->attached_skb = true;
+            server->attached_skb = true;
         }
         else
         {
@@ -126,25 +126,25 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     return 0;
 }
 
-void bpf_shutdown( struct bpf_t * bpf )
+void bpf_shutdown( struct server_t * server )
 {
-    assert( bpf );
+    assert( servevr );
 
-    if ( bpf->program != NULL )
+    if ( server->program != NULL )
     {
-        if ( bpf->attached_native )
+        if ( server->attached_native )
         {
-            xdp_program__detach( bpf->program, bpf->interface_index, XDP_MODE_NATIVE, 0 );
+            xdp_program__detach( server->program, server->interface_index, XDP_MODE_NATIVE, 0 );
         }
-        if ( bpf->attached_skb )
+        if ( server->attached_skb )
         {
-            xdp_program__detach( bpf->program, bpf->interface_index, XDP_MODE_SKB, 0 );
+            xdp_program__detach( server->program, server->interface_index, XDP_MODE_SKB, 0 );
         }
-        xdp_program__close( bpf->program );
+        xdp_program__close( server->program );
     }
 }
 
-static struct bpf_t bpf;
+static struct server_t server;
 
 volatile bool quit;
 
@@ -161,7 +161,7 @@ void clean_shutdown_handler( int signal )
 
 static void cleanup()
 {
-    bpf_shutdown( &bpf );
+    server_shutdown( &server );
     fflush( stdout );
 }
 
@@ -173,7 +173,7 @@ int main( int argc, char *argv[] )
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
 
-    if ( bpf_init( &bpf, INTERFACE_NAME ) != 0 )
+    if ( server_init( &server, INTERFACE_NAME ) != 0 )
     {
         cleanup();
         return 1;
