@@ -430,7 +430,19 @@ int client_generate_packet( void * data, int payload_bytes )
 
 void client_update( struct client_t * client )
 {
+    // don't do anything if we don't have enough free packets
+
+    if ( client->num_frames < SEND_BATCH_SIZE )
+        return;
+
     // queue packets to send
+
+    int send_index;
+    int result = xsk_ring_prod__reserve( &client->send_queue, num_packets, &send_index );
+    if ( result != num_packets ) 
+    {
+        return;
+    }
 
     int num_packets = 0;
     uint64_t packet_address[SEND_BATCH_SIZE];
@@ -440,8 +452,7 @@ void client_update( struct client_t * client )
     {
         uint64_t frame = client_alloc_frame( client );
 
-        if ( frame == INVALID_FRAME )
-            break;
+        assert( frame != INVALID_FRAME );   // this should never happen
 
         uint8_t * packet = client->buffer + frame;
 
@@ -452,14 +463,6 @@ void client_update( struct client_t * client )
 
         if ( num_packets == SEND_BATCH_SIZE )
             break;
-    }
-
-    int send_index;
-    int result = xsk_ring_prod__reserve( &client->send_queue, num_packets, &send_index );
-    if ( result != num_packets ) 
-    {
-        printf( "\nerror: failed to reserve entries in send queue ring buffer\n\n" );
-        exit(1);
     }
 
     for ( int i = 0; i < num_packets; i++ )
