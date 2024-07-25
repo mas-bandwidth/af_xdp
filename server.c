@@ -195,7 +195,7 @@ int main( int argc, char *argv[] )
         }
 
         uint64_t received_packets = 0;
-        for ( int i = 0; i < received_packets; i++ )
+        for ( int i = 0; i < num_cpus; i++ )
         {
             received_packets += thread_received_packets[i];
         }
