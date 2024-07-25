@@ -82,6 +82,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                             __u64 * packets_received = (__u64*) bpf_map_lookup_elem( &received_packets_map, &zero );
                             if ( packets_received ) 
                             {
+                                debug_printf( "atomic add" );
                                 __sync_fetch_and_add( packets_received, 1 );
                             }
     
