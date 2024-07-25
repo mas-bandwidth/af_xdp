@@ -56,12 +56,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
     struct ethhdr * eth = data;
 
-    void * data = (void*) (long) ctx->data; 
-
-    void * data_end = (void*) (long) ctx->data_end; 
-
-    struct ethhdr * eth = data;
-
     if ( (void*)eth + sizeof(struct ethhdr) < data_end )
     {
         if ( eth->h_proto == __constant_htons(ETH_P_IP) ) // IPV4
