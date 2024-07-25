@@ -513,6 +513,8 @@ int main( int argc, char * argv[] )
 
     while ( !quit )
     {
+        usleep( 1000000 );
+
         client_update( &client);
     }
 

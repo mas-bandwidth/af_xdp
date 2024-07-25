@@ -21,7 +21,7 @@ DONE
 
 	Set to only one RSS queue for now:
 
-		sudo ethtool -L enp8s0f0 combined 4
+		sudo ethtool -L enp8s0f0 combined 1
 		sudo ethtool -l enp8s0f0
 
 	Setup vision linux box so it's ready to go
@@ -150,6 +150,8 @@ DONE
 	Create a stats thread
 
 	Print out stats once per-second on stats thread.
+
+	I can send more than 1 million packets per-second from a single core on vision. Pretty amazing!
 
 TODO
 
