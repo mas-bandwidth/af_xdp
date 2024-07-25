@@ -187,7 +187,7 @@ int main( int argc, char *argv[] )
 
         __u64 thread_received_packets[num_cpus];
         int key = 0;
-        if ( bpf_map_lookup_elem( server->received_packets_fd, &key, thread_received_packets ) != 0 ) 
+        if ( bpf_map_lookup_elem( server.received_packets_fd, &key, thread_received_packets ) != 0 ) 
         {
             printf( "\nerror: could not look up received packets map: %s\n\n", strerror( errno ) );
             quit = true;
