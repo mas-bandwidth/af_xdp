@@ -30,6 +30,7 @@
 #include <pthread.h>
 #include <sched.h>
 #include <errno.h>
+#include <inttypes.h>
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
