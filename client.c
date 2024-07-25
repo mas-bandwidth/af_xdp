@@ -78,7 +78,7 @@ volatile bool quit;
 static void * stats_thread( void * arg )
 {
     unsigned int num_cpus = libbpf_num_possible_cpus();
-    
+
     while ( !quit )
     {
         usleep( 1000000 );
@@ -274,7 +274,7 @@ int client_init( struct client_t * client, const char * interface_name )
     // look up receive packets map
 
     client->received_packets_fd = bpf_obj_get( "/sys/fs/bpf/received_packets_map" );
-    if ( bpf->received_packets_fd <= 0 )
+    if ( client->received_packets_fd <= 0 )
     {
         printf( "\nerror: could not get received packets map: %s\n\n", strerror(errno) );
         return 1;
