@@ -180,12 +180,11 @@ DONE
 
 	Try dropping send batch size to 1...
 
+	Remove reflection. It's not necessary for this example.
+
+	Put received packet stats on the server side.
+
 TODO
-
-	Still broken. I think something is wrong at the ethernet layer level. It is thinking that it's reflecting the packets, and sending them back, but they are just not getting to the client NIC.
-
-	Need to learn more about how ethernet addresses work...
-	------------
 
 	Convert stats to accum version so we can see sent and received per-second.
 
