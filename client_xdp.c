@@ -46,7 +46,7 @@ struct {
     __type( key, int );
     __type( value, __u64 );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
-} packets_received_map SEC(".maps");
+} received_packets_map SEC(".maps");
 
 SEC("client_xdp") int client_xdp_filter( struct xdp_md *ctx ) 
 { 
@@ -79,7 +79,7 @@ SEC("client_xdp") int client_xdp_filter( struct xdp_md *ctx )
                             debug_printf( "client received %d byte packet", payload_bytes );
 
                             int zero = 0;
-                            __u64 * packets_received = (__u64*) bpf_map_lookup_elem( &packets_received_map, &zero );
+                            __u64 * packets_received = (__u64*) bpf_map_lookup_elem( &received_packets_map, &zero );
                             if ( packets_received ) 
                             {
                                 __sync_fetch_and_add( packets_received, 1 );
