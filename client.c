@@ -87,7 +87,7 @@ static void * stats_thread( void * arg )
 
         __u64 received_packets[num_cpus];
         int key = 0;
-        if ( bpf_map_lookup_elem( client->received_packets_fd, &key, values ) != 0 ) 
+        if ( bpf_map_lookup_elem( client->received_packets_fd, &key, received_packets ) != 0 ) 
         {
             printf( "\nerror: could not look up received packets map: %s\n\n", strerror( errno ) );
             quit = true;
