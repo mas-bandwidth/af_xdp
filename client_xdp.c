@@ -80,11 +80,11 @@ SEC("client_xdp") int client_xdp_filter( struct xdp_md *ctx )
 
                             int zero = 0;
                             __u64 * packet_received = (__u64*) bpf_map_lookup_elem( &packet_received_map, &zero );
-                            if ( counters ) 
+                            if ( packets_received ) 
                             {
                                 __sync_fetch_and_add( packet_received, 1 );
                             }
-
+    
                             return XDP_DROP;
                         }
                     }
