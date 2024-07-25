@@ -153,9 +153,34 @@ DONE
 
 	I can send more than 1 million packets per-second from a single core on vision. Pretty amazing!
 
+	Debug why not seeing packets back from server
+
+	Server is receiving packets from the client
+
+	It thinks it is reflecting them
+
+	The client isn't logging any packets received back from server -- but this used to be working. What's going on?
+
+	It looks like the interface isn't getting any packets sent back to it from the server. What's wrong?
+
+	ifconfig
+
+		enp8s0f0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+	        inet 192.168.183.121  netmask 255.255.255.0  broadcast 192.168.183.255
+	        inet6 fe80::7a32:17d5:df24:24fd  prefixlen 64  scopeid 0x20<link>
+	        ether a0:36:9f:68:eb:98  txqueuelen 1000  (Ethernet)
+	        RX packets 0  bytes 0 (0.0 B)
+	        RX errors 239  dropped 0  overruns 0  frame 239
+	        TX packets 346637  bytes 49221386 (49.2 MB)
+	        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
 TODO
 
-	Debug why not seeing packets back from server
+	Could it be because I don't have the receive queues setup? I remember it used to work, but this was before I simplified.
+
+	Don't think so.
+
+	Try dropping send batch size to 1...
 
 	------------
 

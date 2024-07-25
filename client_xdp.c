@@ -1,7 +1,7 @@
 /*
     UDP client XDP program
 
-    Passes packets received down to AF_XDP socket for processing
+    Counts IPv4 UDP packets received on port 40000
 
     USAGE:
 

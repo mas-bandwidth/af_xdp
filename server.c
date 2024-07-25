@@ -16,6 +16,8 @@
 #include <bpf/libbpf.h>
 #include <xdp/libxdp.h>
 
+const char * INTERFACE_NAME = "enp8s0f0";
+
 struct bpf_t
 {
     int interface_index;
@@ -159,9 +161,7 @@ int main( int argc, char *argv[] )
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
 
-    const char * interface_name = "enp8s0f0"; // hulk 10G NIC
-
-    if ( bpf_init( &bpf, interface_name ) != 0 )
+    if ( bpf_init( &bpf, INTERFACE_NAME ) != 0 )
     {
         cleanup();
         return 1;
