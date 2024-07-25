@@ -174,14 +174,17 @@ DONE
 	        TX packets 346637  bytes 49221386 (49.2 MB)
 	        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
-TODO
-
 	Could it be because I don't have the receive queues setup? I remember it used to work, but this was before I simplified.
 
 	Don't think so.
 
 	Try dropping send batch size to 1...
 
+TODO
+
+	Still broken. I think something is wrong at the ethernet layer level. It is thinking that it's reflecting the packets, and sending them back, but they are just not getting to the client NIC.
+
+	Need to learn more about how ethernet addresses work...
 	------------
 
 	Convert stats to accum version so we can see sent and received per-second.

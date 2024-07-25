@@ -1,7 +1,7 @@
 /*
-    UDP reflect server XDP program
+    UDP server XDP program
 
-    Reflects IPv4 UDP packets sent to port 40000 back to sender.
+    Counts IPv4 UDP packets received on port 40000
 
     USAGE:
 
@@ -40,46 +40,22 @@
 #define debug_printf(...) do { } while (0)
 #endif // #if DEBUG
 
-static void reflect_packet( void * data, int payload_bytes )
-{
-    struct ethhdr * eth = data;
-    struct iphdr  * ip  = data + sizeof( struct ethhdr );
-    struct udphdr * udp = (void*) ip + sizeof( struct iphdr );
-
-    __u16 a = udp->source;
-    udp->source = udp->dest;
-    udp->dest = a;
-    udp->check = 0;
-    udp->len = bpf_htons( sizeof(struct udphdr) + payload_bytes );
-
-    __u32 b = ip->saddr;
-    ip->saddr = ip->daddr;
-    ip->daddr = b;
-    ip->tot_len = bpf_htons( sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes );
-    ip->check = 0;
-
-    char c[ETH_ALEN];
-    memcpy( c, eth->h_source, ETH_ALEN );
-    memcpy( eth->h_source, eth->h_dest, ETH_ALEN );
-    memcpy( eth->h_dest, c, ETH_ALEN );
-
-    __u16 * p = (__u16*) ip;
-    __u32 checksum = p[0];
-    checksum += p[1];
-    checksum += p[2];
-    checksum += p[3];
-    checksum += p[4];
-    checksum += p[5];
-    checksum += p[6];
-    checksum += p[7];
-    checksum += p[8];
-    checksum += p[9];
-    checksum = ~ ( ( checksum & 0xFFFF ) + ( checksum >> 16 ) );
-    ip->check = checksum;
-}
+struct {
+    __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
+    __uint( max_entries, 1 );
+    __type( key, int );
+    __type( value, __u64 );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
+} received_packets_map SEC(".maps");
 
 SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx ) 
 { 
+    void * data = (void*) (long) ctx->data; 
+
+    void * data_end = (void*) (long) ctx->data_end; 
+
+    struct ethhdr * eth = data;
+
     void * data = (void*) (long) ctx->data; 
 
     void * data_end = (void*) (long) ctx->data_end; 
@@ -106,11 +82,16 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                             int payload_bytes = data_end - payload;
 
-                            debug_printf( "reflecting %d byte udp packet", payload_bytes );
+                            debug_printf( "server received %d byte packet", payload_bytes );
 
-                            reflect_packet( data, payload_bytes );
-
-                            return XDP_TX;
+                            int zero = 0;
+                            __u64 * packets_received = (__u64*) bpf_map_lookup_elem( &received_packets_map, &zero );
+                            if ( packets_received ) 
+                            {
+                                __sync_fetch_and_add( packets_received, 1 );
+                            }
+    
+                            return XDP_DROP;
                         }
                     }
                 }

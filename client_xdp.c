@@ -40,59 +40,9 @@
 #define debug_printf(...) do { } while (0)
 #endif // #if DEBUG
 
-struct {
-    __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
-    __uint( max_entries, 1 );
-    __type( key, int );
-    __type( value, __u64 );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} received_packets_map SEC(".maps");
-
 SEC("client_xdp") int client_xdp_filter( struct xdp_md *ctx ) 
 { 
-    void * data = (void*) (long) ctx->data; 
-
-    void * data_end = (void*) (long) ctx->data_end; 
-
-    struct ethhdr * eth = data;
-
-    if ( (void*)eth + sizeof(struct ethhdr) < data_end )
-    {
-        if ( eth->h_proto == __constant_htons(ETH_P_IP) ) // IPV4
-        {
-            struct iphdr * ip = data + sizeof(struct ethhdr);
-
-            if ( (void*)ip + sizeof(struct iphdr) < data_end )
-            {
-                if ( ip->protocol == IPPROTO_UDP ) // UDP
-                {
-                    struct udphdr * udp = (void*) ip + sizeof(struct iphdr);
-
-                    if ( (void*)udp + sizeof(struct udphdr) <= data_end )
-                    {
-                        if ( udp->dest == __constant_htons(40000) )
-                        {
-                            void * payload = (void*) udp + sizeof(struct udphdr);
-
-                            int payload_bytes = data_end - payload;
-
-                            debug_printf( "client received %d byte packet", payload_bytes );
-
-                            int zero = 0;
-                            __u64 * packets_received = (__u64*) bpf_map_lookup_elem( &received_packets_map, &zero );
-                            if ( packets_received ) 
-                            {
-                                __sync_fetch_and_add( packets_received, 1 );
-                            }
-    
-                            return XDP_DROP;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
+    // nop
     return XDP_PASS;
 }
 

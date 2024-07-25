@@ -48,7 +48,7 @@ const uint16_t CLIENT_PORT = 40000;
 
 const int PAYLOAD_BYTES = 100;
 
-const int SEND_BATCH_SIZE = 1; // 256;
+const int SEND_BATCH_SIZE = 256;
 
 #define NUM_FRAMES 4096
 
@@ -87,16 +87,7 @@ static void * stats_thread( void * arg )
     {
         usleep( 1000000 );
 
-        __u64 received_packets[num_cpus];
-        int key = 0;
-        if ( bpf_map_lookup_elem( client->received_packets_fd, &key, received_packets ) != 0 ) 
-        {
-            printf( "\nerror: could not look up received packets map: %s\n\n", strerror( errno ) );
-            quit = true;
-            break;
-        }
-
-        printf( "sent %" PRId64 ", received %" PRId64 "\n", client->num_packets_sent, (uint64_t)received_packets[0] );
+        printf( "sent %" PRId64 "\n", client->num_packets_sent );
     }
 
 /*
