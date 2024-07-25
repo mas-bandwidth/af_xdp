@@ -84,6 +84,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                             {
                                 debug_printf( "atomic add" );
                                 __sync_fetch_and_add( packets_received, 1 );
+                                debug_printf( "received %d packets", *packets_received );
                             }
     
                             return XDP_DROP;
