@@ -439,7 +439,7 @@ void client_update( struct client_t * client )
 
     int send_index;
     int result = xsk_ring_prod__reserve( &client->send_queue, SEND_BATCH_SIZE, &send_index );
-    if ( result != num_packets ) 
+    if ( result != SEND_BATCH_SIZE ) 
     {
         return;
     }
