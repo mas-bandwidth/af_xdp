@@ -126,7 +126,7 @@ int server_init( struct server_t * server, const char * interface_name )
     return 0;
 }
 
-void bpf_shutdown( struct server_t * server )
+void server_shutdown( struct server_t * server )
 {
     assert( server );
 
