@@ -70,9 +70,9 @@ struct client_t
     struct xsk_socket * xsk;
     uint64_t frames[NUM_FRAMES];
     uint32_t num_frames;
-    uint64_t num_packets_sent;
+    uint64_t current_sent_packets;
+    uint64_t previous_sent_packets;
     pthread_t stats_thread;
-    int received_packets_fd;
 };
 
 volatile bool quit;
@@ -85,18 +85,14 @@ static void * stats_thread( void * arg )
     {
         usleep( 1000000 );
 
-        printf( "sent %" PRId64 "\n", client->num_packets_sent );
-    }
+        uint64_t sent_packets = client->current_sent_packets;
 
-/*
-        uint64_t input_delta = current_processed_inputs - previous_processed_inputs;
-        uint64_t player_state_delta = current_player_state_packets_sent - previous_player_state_packets_sent;
-        uint64_t lost_delta = current_lost_inputs - previous_lost_inputs;
-        printf( "input delta: %" PRId64 ", player state delta: %" PRId64 ", lost delta: %" PRId64 "\n", input_delta, player_state_delta, lost_delta );
-        previous_processed_inputs = current_processed_inputs;
-        previous_player_state_packets_sent = current_player_state_packets_sent;
-        previous_lost_inputs = current_lost_inputs;
-*/
+        uint64_t sent_delta = sent_packets - client->previous_sent_packets;
+
+        printf( "sent delta %" PRId64 "\n", sent_delta );
+
+        client->previous_sent_packets = sent_packets;
+    }
 
     return NULL;
 }
@@ -482,7 +478,7 @@ void client_update( struct client_t * client )
 
         xsk_ring_cons__release( &client->complete_queue, completed );
 
-        __sync_fetch_and_add( &client->num_packets_sent, completed );
+        __sync_fetch_and_add( &client->current_sent_packets, completed );
     }
 }
 

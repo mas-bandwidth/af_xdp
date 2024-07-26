@@ -184,13 +184,19 @@ DONE
 
 	Put received packet stats on the server side.
 
+	Try increasing txqueuelen:
+
+	   sudo ifconfig enp8s0f0 mtu 1500 txqueuelen 10000 up
+
+	I think we need to spread the load so packets are received on multiple RSS queues (cores) on hulk
+
 TODO
 
 	Convert stats to accum version so we can see sent and received per-second.
 
 	------------
 
-	Move the current version to 001, write a README.md
+	
 
 	------------
 
