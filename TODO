@@ -190,28 +190,8 @@ DONE
 
 	I think we need to spread the load so packets are received on multiple RSS queues (cores) on hulk
 
-TODO
-
 	Convert stats to accum version so we can see sent and received per-second.
 
-	------------
+TODO
 
-	
-
-	------------
-
-	Create a 002
-
-	You can lie about what address packets are coming from
-
-	This means I can spoof multiple source client addresses, as long as I take care to always respond to the real (hardcoded) client address, it will work.
-
-	This should distribute packet sends across multiple receive queues on the server
-
-	------------
-
-	The same lie needs to be done by the server -> client on reflecting the packet. lie about the source address
-
-	Then the client will also receive packets across all receive queues
-
-	------------
+	Lie about the from UDP address when sending packets, so it gets spread across multiple receive queues
