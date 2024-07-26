@@ -214,7 +214,7 @@ int main( int argc, char *argv[] )
     {
         usleep( 1000000 );
 
-        uint64_t received_packets = server_get_received_packets( server );
+        uint64_t received_packets = server_get_received_packets( &server );
 
         printf( "received %" PRId64 "\n", received_packets );
 
