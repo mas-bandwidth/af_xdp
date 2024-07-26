@@ -218,7 +218,7 @@ int main( int argc, char *argv[] )
 
         uint64_t received_delta = received_packets - server.previous_received_packets;
 
-        printf( "received %" PRId64 "\n", received_packets );
+        printf( "received delta %" PRId64 "\n", received_delta );
 
         server.previous_received_packets = received_packets;
     }
