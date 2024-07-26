@@ -138,7 +138,7 @@ int server_init( struct server_t * server, const char * interface_name )
     return 0;
 }
 
-uint64_t server_get_received_packets()
+uint64_t server_get_received_packets( struct server_t * server )
 {
     __u64 thread_received_packets[server->num_cpus];
     int key = 0;
