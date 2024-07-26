@@ -192,6 +192,8 @@ DONE
 
 	Convert stats to accum version so we can see sent and received per-second.
 
+	I could lie about the logs from UDP address when sending packets, so it gets spread across multiple receive queues... but it seems that I don't need to bother. A single core can do 6million packets per-second.
+
 TODO
 
-	Lie about the from UDP address when sending packets, so it gets spread across multiple receive queues
+	
