@@ -260,15 +260,6 @@ int client_init( struct client_t * client, const char * interface_name )
 
     client->num_frames = NUM_FRAMES;
 
-    // look up receive packets map
-
-    client->received_packets_fd = bpf_obj_get( "/sys/fs/bpf/received_packets_map" );
-    if ( client->received_packets_fd <= 0 )
-    {
-        printf( "\nerror: could not get received packets map: %s\n\n", strerror(errno) );
-        return 1;
-    }
-
     // create stats thread
 
     ret = pthread_create( &client->stats_thread, NULL, stats_thread, client );
