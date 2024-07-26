@@ -33,7 +33,7 @@ struct server_t
     uint64_t previous_received_packets;
 };
 
-uint64_t server_get_received_packets();
+uint64_t server_get_received_packets( struct server_t * server );
 
 int server_init( struct server_t * server, const char * interface_name )
 {
@@ -120,10 +120,6 @@ int server_init( struct server_t * server, const char * interface_name )
         }
     }
 
-    // get number of possible cpus
-
-    server->num_cpus = libbpf_num_possible_cpus();
-
     // look up receive packets map
 
     server->received_packets_fd = bpf_obj_get( "/sys/fs/bpf/received_packets_map" );
@@ -133,7 +129,11 @@ int server_init( struct server_t * server, const char * interface_name )
         return 1;
     }
 
-    server->previous_received_packets = server_get_received_packets();
+    // get number of possible cpus and store the current received packets value in previous, so we don't get large numbers on first update when we run the program repeatedly
+
+    server->num_cpus = libbpf_num_possible_cpus();
+
+    server->previous_received_packets = server_get_received_packets( server );
 
     return 0;
 }
