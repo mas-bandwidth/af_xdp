@@ -27,7 +27,11 @@ struct server_t
     bool attached_native;
     bool attached_skb;
     int received_packets_fd;
+    uint64_t current_received_packets;
+    uint64_t previous_received_packets;
 };
+
+uint64_t server_get_received_packets();
 
 int server_init( struct server_t * server, const char * interface_name )
 {
@@ -123,7 +127,28 @@ int server_init( struct server_t * server, const char * interface_name )
         return 1;
     }
 
+    server->previous_received_packets = server_get_received_packets();
+
     return 0;
+}
+
+uint64_t server_get_received_packets()
+{
+    __u64 thread_received_packets[num_cpus];
+    int key = 0;
+    if ( bpf_map_lookup_elem( server.received_packets_fd, &key, thread_received_packets ) != 0 ) 
+    {
+        printf( "\nerror: could not look up received packets map: %s\n\n", strerror( errno ) );
+        exit( 1 );
+    }
+
+    uint64_t received_packets = 0;
+    for ( int i = 0; i < num_cpus; i++ )
+    {
+        received_packets += thread_received_packets[i];
+    }
+
+    return received_packets;
 }
 
 void server_shutdown( struct server_t * server )
@@ -185,22 +210,11 @@ int main( int argc, char *argv[] )
     {
         usleep( 1000000 );
 
-        __u64 thread_received_packets[num_cpus];
-        int key = 0;
-        if ( bpf_map_lookup_elem( server.received_packets_fd, &key, thread_received_packets ) != 0 ) 
-        {
-            printf( "\nerror: could not look up received packets map: %s\n\n", strerror( errno ) );
-            quit = true;
-            break;
-        }
-
-        uint64_t received_packets = 0;
-        for ( int i = 0; i < num_cpus; i++ )
-        {
-            received_packets += thread_received_packets[i];
-        }
+        uint64_t received_packets = server_get_received_packets( server );
 
         printf( "received %" PRId64 "\n", received_packets );
+
+
     }
 
     cleanup();
