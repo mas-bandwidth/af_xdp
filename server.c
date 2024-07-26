@@ -17,6 +17,7 @@
 #include <xdp/libxdp.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <stdlib.h>
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
@@ -27,6 +28,7 @@ struct server_t
     bool attached_native;
     bool attached_skb;
     int received_packets_fd;
+    int num_cpus;
     uint64_t current_received_packets;
     uint64_t previous_received_packets;
 };
@@ -118,6 +120,10 @@ int server_init( struct server_t * server, const char * interface_name )
         }
     }
 
+    // get number of possible cpus
+
+    server->num_cpus = libbpf_num_possible_cpus();
+
     // look up receive packets map
 
     server->received_packets_fd = bpf_obj_get( "/sys/fs/bpf/received_packets_map" );
@@ -134,7 +140,7 @@ int server_init( struct server_t * server, const char * interface_name )
 
 uint64_t server_get_received_packets()
 {
-    __u64 thread_received_packets[num_cpus];
+    __u64 thread_received_packets[server->num_cpus];
     int key = 0;
     if ( bpf_map_lookup_elem( server.received_packets_fd, &key, thread_received_packets ) != 0 ) 
     {
@@ -143,7 +149,7 @@ uint64_t server_get_received_packets()
     }
 
     uint64_t received_packets = 0;
-    for ( int i = 0; i < num_cpus; i++ )
+    for ( int i = 0; i < server->num_cpus; i++ )
     {
         received_packets += thread_received_packets[i];
     }
@@ -203,8 +209,6 @@ int main( int argc, char *argv[] )
         cleanup();
         return 1;
     }
-
-    unsigned int num_cpus = libbpf_num_possible_cpus();
 
     while ( !quit )
     {
