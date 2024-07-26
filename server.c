@@ -216,11 +216,11 @@ int main( int argc, char *argv[] )
 
         uint64_t received_packets = server_get_received_packets( &server );
 
-        uint64_t received_delta = received_packets - server->previous_received_packets;
+        uint64_t received_delta = received_packets - server.previous_received_packets;
 
         printf( "received %" PRId64 "\n", received_packets );
 
-        server->previous_received_packets = received_packets;
+        server.previous_received_packets = received_packets;
     }
 
     cleanup();
