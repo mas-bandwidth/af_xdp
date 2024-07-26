@@ -142,7 +142,7 @@ uint64_t server_get_received_packets( struct server_t * server )
 {
     __u64 thread_received_packets[server->num_cpus];
     int key = 0;
-    if ( bpf_map_lookup_elem( server.received_packets_fd, &key, thread_received_packets ) != 0 ) 
+    if ( bpf_map_lookup_elem( server->received_packets_fd, &key, thread_received_packets ) != 0 ) 
     {
         printf( "\nerror: could not look up received packets map: %s\n\n", strerror( errno ) );
         exit( 1 );
