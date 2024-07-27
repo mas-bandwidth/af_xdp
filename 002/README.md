@@ -36,9 +36,11 @@ const char * INTERFACE_NAME = "enp8s0f0";
 
 Next, we want two real CPU cores, not two hyperthread cores on the same CPU.
 
-Disable hyperthreading on your Linux box:
+Disable hyperthreading on both your client and server Linux boxes:
 
-`...`
+```console
+echo off | sudo tee /sys/devices/system/cpu/smt/control
+```
 
 Build:
 
