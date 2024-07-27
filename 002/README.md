@@ -2,13 +2,13 @@
 
 _(Work in progress...)_
 
-Let's send even more packets by using two cores.
+Let's send even more packets.
 
-By using *two cores* on a 5 year old bare metal linux box, I'm able to send ~12.2 million 100 byte UDP packets per-second.
+By using *two cores* I'm able to send ~12.2 million 100 byte UDP packets per-second.
 
-Going any further than this will require a NIC faster than 10G, but it should scale linearly as you add more cores up to the maximum line rate.
+Going any further requires a NIC faster than 10G, but it _should_ scale linearly as you add more cores up to the maximum line rate of your NIC.
 
-ps. To ensure that the packets are evenly distributed across RSS queues on the server, I lie about the client address and port when I construct the raw packet. This way received packets get load balanced across all RSS queues on the 10G NIC. This is easy to do because AF_XDP constructs raw packets, including the IP header so we can just tell a white lie about the sender IP address there.
+To ensure that the packets are evenly distributed across RSS queues on the server, I lie about the client address and port when I construct the raw packet to send over the AF_XDP socket. This way received packets get load balanced across all RSS queues on the 10G NIC. It's much cheaper than buying 100s of linux machines for testing :)
 
 To build, first make sure you have Linux setup according to the instructions here: https://mas-bandwidth.com/xdp-for-game-programmers/
 
