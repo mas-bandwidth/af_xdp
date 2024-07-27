@@ -6,6 +6,28 @@ Using only *one core* on a 5 year old bare metal linux box, I'm able to send ~6.
 
 To build, first make sure you have Linux setup according to the instructions here: https://mas-bandwidth.com/xdp-for-game-programmers/
 
+Next, edit the source to specify your network interface, and your own ethernet addresses and IP addresses for your client and server (use ifconfig to see them).
+
+In client.c:
+
+```c
+const char * INTERFACE_NAME = "enp8s0f0";
+
+const uint8_t CLIENT_ETHERNET_ADDRESS[] = { 0xa0, 0x36, 0x9f, 0x68, 0xeb, 0x98 };
+
+const uint8_t SERVER_ETHERNET_ADDRESS[] = { 0xa0, 0x36, 0x9f, 0x1e, 0x1a, 0xec };
+
+const uint32_t CLIENT_IPV4_ADDRESS = 0xc0a8b779; // 192.168.183.121
+
+const uint32_t SERVER_IPV4_ADDRESS = 0xc0a8b77c; // 192.168.183.124
+```
+
+In server.c:
+
+```c
+const char * INTERFACE_NAME = "enp8s0f0";
+```
+
 Then:
 
 `make`
