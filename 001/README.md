@@ -48,3 +48,5 @@ With a Netgear 10G router ($550 USD):
 https://www.newegg.com/netgear-xs508m-100nas-7-x-10-gig-multi-gig-copper-ports-1-x-10g-1g-sfp-and-copper/p/N82E16833122954
 
 You could also try this on Google Cloud, but I doubt you'll get the same performance as bare metal.
+
+ps. If you do try this on Google Cloud, make sure you use send data between VMs using internal addresses (!!!)
