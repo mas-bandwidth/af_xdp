@@ -2,7 +2,7 @@
 
 Let's send millions of packets per-second.
 
-Using only *one core* on a 5 year old bare metal linux box, I'm able to send ~6.1 million 100 byte UDP packets per-second.
+Using only *one core* on a 5 year old bare metal linux box, I'm able to send ~6.1 million 100 byte UDP packets per-second with AF_XDP.
 
 To build, first make sure you have Linux setup according to the instructions here: https://mas-bandwidth.com/xdp-for-game-programmers/
 
