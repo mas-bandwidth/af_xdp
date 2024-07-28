@@ -405,7 +405,7 @@ uint16_t ipv4_checksum( const void * data, size_t header_length )
     return ~sum;
 }
 
-int client_generate_packet( void * data, int payload_bytes, uint32_t counter )
+int client_generate_packet( void * data, int payload_bytes )
 {
     struct ethhdr * eth = data;
     struct iphdr  * ip  = data + sizeof( struct ethhdr );
@@ -480,7 +480,7 @@ void socket_update( struct socket_t * socket, int queue_id )
         uint8_t * packet = socket->buffer + frame;
 
         packet_address[num_packets] = frame;
-        packet_length[num_packets] = client_generate_packet( packet, PAYLOAD_BYTES, socket->counter + num_packets );
+        packet_length[num_packets] = client_generate_packet( packet, PAYLOAD_BYTES );
 
         num_packets++;
 
