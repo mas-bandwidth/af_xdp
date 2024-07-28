@@ -212,7 +212,7 @@ int client_init( struct client_t * client, const char * interface_name )
         memset( &xsk_config, 0, sizeof(xsk_config) );
 
         xsk_config.rx_size = 0;
-        xsk_config.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS * 4;                     // try a bigger send queue?
+        xsk_config.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
         xsk_config.xdp_flags = XDP_ZEROCOPY;                                            // force zero copy mode
         xsk_config.bind_flags = XDP_USE_NEED_WAKEUP;                                    // manually wake up the driver when it needs to do work to send packets
         xsk_config.libbpf_flags = XSK_LIBBPF_FLAGS__INHIBIT_PROG_LOAD;
@@ -453,17 +453,6 @@ int client_generate_packet( void * data, int payload_bytes, uint32_t counter )
 
 void socket_update( struct socket_t * socket, int queue_id )
 {
-    // try poll?!
-
-    struct pollfd fds[2];
-    int ret, nfds = 1;
-
-    memset(fds, 0, sizeof(fds));
-    fds[0].fd = xsk_socket__fd( socket->xsk );
-    fds[0].events = POLLIN;
-
-    poll( fds, nfds, -1 );
-
     // don't do anything if we don't have enough free packets to send a batch
 
     if ( socket->num_frames < SEND_BATCH_SIZE )
