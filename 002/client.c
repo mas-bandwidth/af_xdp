@@ -507,7 +507,7 @@ static void * socket_thread( void * arg )
 
     while ( !quit )
     {
-        socket_update( socket, (int) socket - &client.socket[0] );
+        socket_update( socket, (int) ( socket - &client.socket[0] ) );
     }
 }
 
