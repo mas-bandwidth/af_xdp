@@ -522,6 +522,8 @@ static void * socket_thread( void * arg )
 
     int queue_id = (int) ( socket - &client.socket[0] );
 
+    printf( "started socket thread for queue #%d\n", queue_id );
+
     pin_thread_to_cpu( queue_id );
 
     while ( !quit )
