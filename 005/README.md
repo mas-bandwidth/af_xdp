@@ -1,32 +1,18 @@
-# 004
+# 005
 
-I'm using an Intel 10G NIC for these tests.
+According to this paper, the lowest latency for AF_XDP is obtained when:
 
-How many 100 byte packets can we _theoretically_ send over a 10gbit NIC per-second?
+1. Busy polling is disabled
+2. Polling is disabled (calling poll from the program to do work)
+3. Need wakeup is disabled
 
-This is called "line rate", which is covered really nicely in this article:
+I've followed these recommendations from the first versions of the program, but now we're not actually trying to optimize away nanoseconds, we're trying to get close to line rate.
 
-https://www.fmad.io/blog/what-is-10g-line-rate
+It's possible that some of these settings are reducing throughput.
 
-It feels like at 100 byte packets, we're getting close to the line rate. Let's calculate it from the article.
+In this version, I force to zero copy mode on the AF_XDP, to make sure that's active and enable the need wakeup. Theoretically, this should help.
 
-
-100 byte UDP payload = 20 byte IPv4 header + 8 byte UDP header + 100 bytes = 124 bytes payload per-packet at the ethernet level:
-
-```
-Preamble	                        blue	  8 bytes		8 B
-Payload	                            green	124 bytes     132 B
-Frame Check Sequence	            yellow	  4 bytes     136 B
-Epilogue	                        purple	  1 bytes     137 B
-Inter Frame Gap (+Epilogue its 12B)	red	     11 bytes     148 B
-```
-
-So our 100 byte UDP packet expands to 148 bytes on the ethernet wire.
+Results:
 
 ```
-10.00e9 bits / (8 bits * 148 bytes) = ~8,445,945
 ```
-
-So the theoretical maximum number of 100 byte packets we should be able to send over 10G is 8.4M packets per-second.
-
-We're close but we're not quite hitting that, even though all cores on the client are sending packets. What's up?
