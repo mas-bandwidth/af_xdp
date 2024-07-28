@@ -262,13 +262,6 @@ int client_init( struct client_t * client, const char * interface_name )
             return 1;
         }
 
-        // todo: do this once we have per-socket threads
-        /*
-        // pin this thread the same CPU as the queue id
-
-        pin_thread_to_cpu( queue_id );
-        */
-
         // initialize frame allocator
 
         for ( int j = 0; j < NUM_FRAMES; j++ )
@@ -278,6 +271,9 @@ int client_init( struct client_t * client, const char * interface_name )
 
         client->socket[i].num_frames = NUM_FRAMES;
     }
+
+    // todo: move this into the socket thread
+    pin_thread_to_cpu( 0 );
 
     // create stats thread
 
