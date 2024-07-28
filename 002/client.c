@@ -46,7 +46,7 @@ const uint16_t SERVER_PORT = 40000;
 
 const uint16_t CLIENT_PORT = 40000;
 
-const int PAYLOAD_BYTES = 36;   // 60 byte packet including IPv4 (20 bytes) and UDP header (8 bytes). Just 36 bytes of payload. Standard line rate packet size of 60 bytes payload over ethernet + 4 bytes 
+const int PAYLOAD_BYTES = 100;
 
 const int SEND_BATCH_SIZE = 256;
 
@@ -67,7 +67,6 @@ struct socket_t
     uint64_t frames[NUM_FRAMES];
     uint32_t num_frames;
     uint64_t sent_packets;
-    uint32_t counter;
     int queue_id;
 };
 
@@ -212,8 +211,8 @@ int client_init( struct client_t * client, const char * interface_name )
 
         xsk_config.rx_size = 0;
         xsk_config.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
-        xsk_config.xdp_flags = XDP_ZEROCOPY;                                            // force zero copy mode
-        xsk_config.bind_flags = XDP_USE_NEED_WAKEUP;                                    // manually wake up the driver when it needs to do work to send packets
+        xsk_config.xdp_flags = 0;
+        xsk_config.bind_flags = 09;
         xsk_config.libbpf_flags = XSK_LIBBPF_FLAGS__INHIBIT_PROG_LOAD;
 
         int queue_id = i;
@@ -426,7 +425,7 @@ int client_generate_packet( void * data, int payload_bytes, uint32_t counter )
     ip->ttl      = 64;
     ip->tot_len  = htons( sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes );
     ip->protocol = IPPROTO_UDP;
-    ip->saddr    = 0xc0a80000 | ( counter & 0xFF ); // 192.168.*.*
+    ip->saddr    = CLIENT_IPV4_ADDRESS;
     ip->daddr    = SERVER_IPV4_ADDRESS;
     ip->check    = 0; 
     ip->check    = ipv4_checksum( ip, sizeof( struct iphdr ) );
@@ -495,11 +494,6 @@ void socket_update( struct socket_t * socket, int queue_id )
     }
 
     xsk_ring_prod__submit( &socket->send_queue, num_packets );
-
-    // send queued packets
-
-    if ( xsk_ring_prod__needs_wakeup( &socket->send_queue ) )
-        sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
 
     // mark completed sent packet frames as free to be reused
 

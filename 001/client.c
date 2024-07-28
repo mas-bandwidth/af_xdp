@@ -450,10 +450,6 @@ void client_update( struct client_t * client )
 
     xsk_ring_prod__submit( &client->send_queue, num_packets );
 
-    // send queued packets
-
-    sendto( xsk_socket__fd( client->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
-
     // mark completed sent packet frames as free to be reused
 
     uint32_t complete_index;
