@@ -204,8 +204,8 @@ DONE
 
 	Modify the code to schmear an increasing counter per-send thread into the source address.
 
-TODO
-
 	Implement socket threads and run it with 2 CPUs.
+
+TODO
 
 	Verify that packets are received on the server side up to 12.2M packets per-second @ 100 byte UDP packets.
