@@ -46,7 +46,7 @@ const uint16_t SERVER_PORT = 40000;
 
 const uint16_t CLIENT_PORT = 40000;
 
-const int PAYLOAD_BYTES = 100;
+const int PAYLOAD_BYTES = 36;   // 60 byte packet including IPv4 (20 bytes) and UDP header (8 bytes). Just 36 bytes of payload. Standard line rate packet size of 60 bytes payload over ethernet + 4 bytes 
 
 const int SEND_BATCH_SIZE = 256;
 
@@ -212,8 +212,8 @@ int client_init( struct client_t * client, const char * interface_name )
 
         xsk_config.rx_size = 0;
         xsk_config.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
-        xsk_config.xdp_flags = 0;
-        xsk_config.bind_flags = XDP_USE_NEED_WAKEUP;
+        xsk_config.xdp_flags = XDP_ZEROCOPY;                                            // force zero copy mode
+        xsk_config.bind_flags = XDP_USE_NEED_WAKEUP;                                    // manually wake up the driver when it needs to do work to send packets
         xsk_config.libbpf_flags = XSK_LIBBPF_FLAGS__INHIBIT_PROG_LOAD;
 
         int queue_id = i;

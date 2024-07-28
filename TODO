@@ -206,6 +206,18 @@ DONE
 
 	Implement socket threads and run it with 2 CPUs.
 
-TODO
-
 	Verify that packets are received on the server side up to 12.2M packets per-second @ 100 byte UDP packets.
+
+	Can't quite get up to 12.2M packets. It's less.
+
+	Need to noodle around...
+
+	Goal should be to hit line rate @ 60 byte packets (with 4 byte frame check sequence)
+
+	https://www.fmad.io/blog/what-is-10g-line-rate
+
+	Try using need wakeup XDP flag, and it does improve things
+
+TODO
+	
+	
