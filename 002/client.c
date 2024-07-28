@@ -46,7 +46,7 @@ const uint16_t SERVER_PORT = 40000;
 
 const uint16_t CLIENT_PORT = 40000;
 
-const int PAYLOAD_BYTES = 50;
+const int PAYLOAD_BYTES = 1200;
 
 const int SEND_BATCH_SIZE = 64;
 
