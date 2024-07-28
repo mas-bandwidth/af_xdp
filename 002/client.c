@@ -352,7 +352,7 @@ uint64_t socket_alloc_frame( struct socket_t * socket )
     if ( socket->num_frames == 0 )
         return INVALID_FRAME;
     socket->num_frames--;
-    uint64_t frame = socket->num_frames];
+    uint64_t frame = socket->num_frames;
     socket->frames[socket->num_frames] = INVALID_FRAME;
     return frame;
 }
