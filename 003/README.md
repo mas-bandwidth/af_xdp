@@ -11,7 +11,14 @@ This way received packets get load balanced across all RSS queues on the 10G NIC
 At 2 send threads, we now see a slightly improved result:
 
 ```
-
+received delta 6592579
+received delta 6596238
+received delta 6602746
+received delta 6605822
+received delta 6600152
+received delta 6601785
+received delta 6600495
+received delta 6599516
 ```
 
 
