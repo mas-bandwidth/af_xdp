@@ -438,15 +438,6 @@ int client_generate_packet( void * data, int payload_bytes, uint32_t counter )
     udp->len     = htons( sizeof(struct udphdr) + payload_bytes );
     udp->check   = 0;
 
-    // generate udp payload
-
-    uint8_t * payload = (void*) udp + sizeof( struct udphdr );
-
-    for ( int i = 0; i < payload_bytes; i++ )
-    {
-        payload[i] = i;
-    }
-
     return sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes; 
 }
 
