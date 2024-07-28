@@ -48,9 +48,9 @@ const uint16_t CLIENT_PORT = 40000;
 
 const int PAYLOAD_BYTES = 100;
 
-const int SEND_BATCH_SIZE = 1024;
+const int SEND_BATCH_SIZE = 4096;
 
-#define NUM_FRAMES (4096*2)
+#define NUM_FRAMES (4096*8)
 
 #define FRAME_SIZE 256 // XSK_UMEM__DEFAULT_FRAME_SIZE
 
