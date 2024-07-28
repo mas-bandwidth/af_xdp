@@ -271,9 +271,9 @@ int client_init( struct client_t * client, const char * interface_name )
 
         // initialize frame allocator
 
-        for ( int i = 0; i < NUM_FRAMES; i++ )
+        for ( int j = 0; j < NUM_FRAMES; j++ )
         {
-            client->socket[i].frames[i] = i * FRAME_SIZE;
+            client->socket[i].frames[j] = j * FRAME_SIZE;
         }
 
         client->socket[i].num_frames = NUM_FRAMES;
