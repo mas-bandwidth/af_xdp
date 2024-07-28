@@ -220,7 +220,7 @@ DONE
 
 TODO
 	
-	It looks on the client side that only 8 cores are working for sends. Is this the bottleneck?
+	It looks on the client side that only 8 cores are working for sends, even though I have 32 cores that should be sending packets. Is this the bottleneck?
 
 		glenn@vision:~$ top
 

@@ -26,9 +26,26 @@ I've read that by using polling you can avoid the soft irqs and have the driver 
 
 I'm not sure if this applies to sending packets or just receive packets, but let's try it...
 
-
+I also tried increasing the size of the tx queue in the ring buffer.
 
 Results:
 
 ```
+sent delta 7534649
+sent delta 7526574
+sent delta 7562380
+sent delta 7522961
+sent delta 7536313
+sent delta 7532544
+sent delta 7532371
+sent delta 7530179
+sent delta 7527757
+sent delta 7530456
+sent delta 7541331
+sent delta 7525405
+sent delta 7534757
+sent delta 7535870
+sent delta 7526928
 ```
+
+No improvement.
