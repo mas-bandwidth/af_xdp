@@ -436,15 +436,17 @@ int client_generate_packet( void * data, int payload_bytes )
 
 void client_update( struct client_t * client, int queue_id )
 {
+    socket_t * socket = &client->socket[queue_id];
+
     // don't do anything if we don't have enough free packets to send a batch
 
-    if ( client->socket[queue_id].num_frames < SEND_BATCH_SIZE )
+    if ( socket.num_frames < SEND_BATCH_SIZE )
         return;
 
     // queue packets to send
 
     int send_index;
-    int result = xsk_ring_prod__reserve( &client->socket[queue_id].send_queue, SEND_BATCH_SIZE, &send_index );
+    int result = xsk_ring_prod__reserve( &socket->send_queue, SEND_BATCH_SIZE, &send_index );
     if ( result == 0 ) 
     {
         return;
@@ -456,11 +458,11 @@ void client_update( struct client_t * client, int queue_id )
 
     while ( true )
     {
-        uint64_t frame = client_alloc_frame( client );
+        uint64_t frame = socket_alloc_frame( socket );
 
         assert( frame != INVALID_FRAME );   // this should never happen
 
-        uint8_t * packet = client->socket[queue_id].buffer + frame;
+        uint8_t * packet = socket->buffer + frame;
 
         packet_address[num_packets] = frame;
         packet_length[num_packets] = client_generate_packet( packet, PAYLOAD_BYTES );
@@ -473,33 +475,33 @@ void client_update( struct client_t * client, int queue_id )
 
     for ( int i = 0; i < num_packets; i++ )
     {
-        struct xdp_desc * desc = xsk_ring_prod__tx_desc( &client->socket[queue_id].send_queue, send_index + i );
+        struct xdp_desc * desc = xsk_ring_prod__tx_desc( &socket->send_queue, send_index + i );
         desc->addr = packet_address[i];
         desc->len = packet_length[i];
     }
 
-    xsk_ring_prod__submit( &client->socket[queue_id].send_queue, num_packets );
+    xsk_ring_prod__submit( &socket->send_queue, num_packets );
 
     // send queued packets
 
-    sendto( xsk_socket__fd( client->socket[queue_id].xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
+    sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
 
     // mark completed sent packet frames as free to be reused
 
     uint32_t complete_index;
 
-    unsigned int completed = xsk_ring_cons__peek( &client->socket[queue_id].complete_queue, XSK_RING_CONS__DEFAULT_NUM_DESCS, &complete_index );
+    unsigned int completed = xsk_ring_cons__peek( &socket->complete_queue, XSK_RING_CONS__DEFAULT_NUM_DESCS, &complete_index );
 
     if ( completed > 0 ) 
     {
         for ( int i = 0; i < completed; i++ )
         {
-            client_free_frame( client, *xsk_ring_cons__comp_addr( &client->socket[queue_id].complete_queue, complete_index++ ) );
+            client_free_frame( client, *xsk_ring_cons__comp_addr( &socket->complete_queue, complete_index++ ) );
         }
 
-        xsk_ring_cons__release( &client->socket[queue_id].complete_queue, completed );
+        xsk_ring_cons__release( &socket->complete_queue, completed );
 
-        __sync_fetch_and_add( &client->socket[queue_id].sent_packets, completed );
+        __sync_fetch_and_add( &socket->sent_packets, completed );
     }
 }
 
