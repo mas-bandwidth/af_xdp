@@ -82,46 +82,8 @@ struct client_t
     uint64_t previous_sent_packets;
 };
 
-volatile bool quit;
-
-static void * stats_thread( void * arg )
-{
-    struct client_t * client = (struct client_t*) arg;
-
-    while ( !quit )
-    {
-        usleep( 1000000 );
-
-        uint64_t sent_packets = 0;
-        for ( int i = 0; i < NUM_CPUS; i++ )
-        {
-            sent_packets += client->socket[i].sent_packets;
-        }
-
-        uint64_t sent_delta = sent_packets - client->previous_sent_packets;
-
-        printf( "sent delta %" PRId64 "\n", sent_delta );
-
-        client->previous_sent_packets = sent_packets;
-    }
-
-    return NULL;
-}
-
-bool pin_thread_to_cpu( int cpu ) 
-{
-    int num_cpus = sysconf( _SC_NPROCESSORS_ONLN );
-    if ( cpu < 0 || cpu >= num_cpus  )
-        return false;
-
-    cpu_set_t cpuset;
-    CPU_ZERO( &cpuset );
-    CPU_SET( cpu, &cpuset );
-
-    pthread_t current_thread = pthread_self();    
-
-    pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
-}
+static void * stats_thread( void * arg );
+static void * socket_thread( void * arg );
 
 int client_init( struct client_t * client, const char * interface_name )
 {
@@ -272,9 +234,6 @@ int client_init( struct client_t * client, const char * interface_name )
         client->socket[i].num_frames = NUM_FRAMES;
     }
 
-    // todo: move this into the socket thread
-    pin_thread_to_cpu( 0 );
-
     // create stats thread
 
     ret = pthread_create( &client->stats_thread, NULL, stats_thread, client );
@@ -284,6 +243,18 @@ int client_init( struct client_t * client, const char * interface_name )
         return 1;
     }
 
+    // create socket threads
+
+    for ( int i = 0; i < NUM_CPUS; i++ )
+    {
+        ret = pthread_create( &client->socket_thread[i], NULL, socket_thread, client );
+        if ( ret ) 
+        {
+            printf( "\nerror: could not create socket thread #%d\n\n", i );
+            return 1;
+        }
+    }
+
     return 0;
 }
 
@@ -291,7 +262,11 @@ void client_shutdown( struct client_t * client )
 {
     assert( client );
 
-    // todo: we gotta join the client threads before this
+    for ( int i = 0; i < NUM_CPUS; i++ )
+    {
+        pthread_join( client->socket_thread[i] );
+        pthread_destroy( client->socket_thread[i] );
+    }
 
     for ( int i = 0; i < NUM_CPUS; i++ )
     {
@@ -322,6 +297,47 @@ void client_shutdown( struct client_t * client )
 
         xdp_program__close( client->program );
     }
+}
+
+volatile bool quit;
+
+static void * stats_thread( void * arg )
+{
+    struct client_t * client = (struct client_t*) arg;
+
+    while ( !quit )
+    {
+        usleep( 1000000 );
+
+        uint64_t sent_packets = 0;
+        for ( int i = 0; i < NUM_CPUS; i++ )
+        {
+            sent_packets += client->socket[i].sent_packets;
+        }
+
+        uint64_t sent_delta = sent_packets - client->previous_sent_packets;
+
+        printf( "sent delta %" PRId64 "\n", sent_delta );
+
+        client->previous_sent_packets = sent_packets;
+    }
+
+    return NULL;
+}
+
+bool pin_thread_to_cpu( int cpu ) 
+{
+    int num_cpus = sysconf( _SC_NPROCESSORS_ONLN );
+    if ( cpu < 0 || cpu >= num_cpus  )
+        return false;
+
+    cpu_set_t cpuset;
+    CPU_ZERO( &cpuset );
+    CPU_SET( cpu, &cpuset );
+
+    pthread_t current_thread = pthread_self();    
+
+    pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
 }
 
 static struct client_t client;
@@ -505,9 +521,13 @@ static void * socket_thread( void * arg )
 {
     struct socket_t * socket = (struct socket_t*) arg;
 
+    int queue_id = (int) ( socket - &client.socket[0] );
+
+    pin_thread_to_cpu( queue_id );
+
     while ( !quit )
     {
-        socket_update( socket, (int) ( socket - &client.socket[0] ) );
+        socket_update( socket, queue_id );
     }
 }
 
@@ -526,6 +546,11 @@ int main( int argc, char * argv[] )
     }
 
     socket_thread( &client.socket[0] );
+
+    while ( !quit )
+    {
+        usleep( 1000 );
+    }
 
     cleanup();
 
