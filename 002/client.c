@@ -40,6 +40,8 @@ const uint8_t CLIENT_ETHERNET_ADDRESS[] = { 0xa0, 0x36, 0x9f, 0x68, 0xeb, 0x98 }
 
 const uint8_t SERVER_ETHERNET_ADDRESS[] = { 0xa0, 0x36, 0x9f, 0x1e, 0x1a, 0xec };
 
+const uint32_t CLIENT_IPV4_ADDRESS = 0xc0a8b779; // 192.168.183.121
+
 const uint32_t SERVER_IPV4_ADDRESS = 0xc0a8b77c; // 192.168.183.124
 
 const uint16_t SERVER_PORT = 40000;
