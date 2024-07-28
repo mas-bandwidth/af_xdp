@@ -1,5 +1,5 @@
 /*
-    UDP reflect server (userspace)
+    UDP server (userspace)
 
     Runs on Ubuntu 22.04 LTS 64bit with Linux Kernel 6.5+ *ONLY*
 */

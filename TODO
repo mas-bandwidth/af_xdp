@@ -194,7 +194,16 @@ DONE
 
 	I could lie about the logs from UDP address when sending packets, so it gets spread across multiple receive queues... but it seems that I don't need to bother. A single core can do 6million packets per-second.
 
+	Create a 001 and 002
+
+	Update readme for 002 and call it out.
+
+	Disable hyperthreading.
+
 TODO
 
-	Create a 001 and 002
-	
+	Modify the code to use two cores.
+
+	Modify the code to schmear an increasing counter per-send thread into the source address.
+
+	Verify that packets are received on the server side up to 12.2M packets per-second @ 100 byte UDP packets.
