@@ -8,17 +8,21 @@ Instead of sending the real client source address in the IPv4 header, I set it t
 
 This way received packets get load balanced across all RSS queues on the 10G NIC (hash of source and dest IP address), and it's much cheaper than buying hundreds of linux machines for testing :)
 
-The results are now much better:
+At 2 send threads, we now see a slightly improved result:
 
 ```
-sent delta 5960640
-sent delta 6087904
-sent delta 6095892
-sent delta 6096036
-sent delta 6108820
-sent delta 6091460
-sent delta 6092058
-sent delta 6097242
-sent delta 6093232
-sent delta 6095776
+
+```
+
+
+Increasing to 32 send threads, the results are now slightly improved, but are starting to hit in upper limit due to 10G bandwidth @ 100 byte packets:
+
+```
+sent delta 7536128
+sent delta 7526829
+sent delta 7533959
+sent delta 7528073
+sent delta 7533217
+sent delta 7528522
+sent delta 7532370
 ```
