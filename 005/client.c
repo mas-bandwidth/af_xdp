@@ -50,7 +50,7 @@ const int PAYLOAD_BYTES = 100;
 
 const int SEND_BATCH_SIZE = 1024;
 
-#define NUM_FRAMES (4096*8)
+#define NUM_FRAMES (4096*16)
 
 #define FRAME_SIZE 256 // XSK_UMEM__DEFAULT_FRAME_SIZE
 
