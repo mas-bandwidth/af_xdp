@@ -525,7 +525,7 @@ int main( int argc, char * argv[] )
         return 1;
     }
 
-    socket_thread( client->socket[0] );
+    socket_thread( client.socket[0] );
 
     cleanup();
 
