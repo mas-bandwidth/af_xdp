@@ -264,7 +264,7 @@ void client_shutdown( struct client_t * client )
 
     for ( int i = 0; i < NUM_CPUS; i++ )
     {
-        pthread_join( client->socket_thread[i] );
+        pthread_join( client->socket_thread[i], NULL );
         pthread_destroy( client->socket_thread[i] );
     }
 
