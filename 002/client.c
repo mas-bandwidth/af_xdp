@@ -252,7 +252,7 @@ int client_init( struct client_t * client, const char * interface_name )
 
     for ( int i = 0; i < NUM_CPUS; i++ )
     {
-        ret = pthread_create( &client->socket_thread[i], NULL, socket_thread, client );
+        ret = pthread_create( &client->socket_thread[i], NULL, socket_thread, &client->socket[i] );
         if ( ret ) 
         {
             printf( "\nerror: could not create socket thread #%d\n\n", i );
