@@ -521,7 +521,7 @@ int main( int argc, char * argv[] )
 
     while ( !quit )
     {
-        client_update( &client );
+        client_update( &client, 0 );        // todo: thread per-socket
     }
 
     cleanup();
