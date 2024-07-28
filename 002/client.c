@@ -58,7 +58,7 @@ const int SEND_BATCH_SIZE = 256;
 
 #define INVALID_FRAME UINT64_MAX
 
-struct socket_t socket
+struct socket_t
 {
     void * buffer;
     struct xsk_umem * umem;
