@@ -31,18 +31,22 @@ MiB Swap:  20479.5 total,  20479.5 free,      0.0 used.  56411.4 avail Mem
 
 Is this the bottleneck?
 
-It's not the RSS queues, those settings are fine. 
-
-Is there something on the transmit side that steers transmitted packets to specific CPUs?
+I look at /etc/interrupts and see that interrrupts for my 10G NIC card are only triggering on the first 8 CPUs.
 
 Some googling and I find "XPS (Transmit Packet Steering)"
 
-Is this active during AF_XDP sends? My assumption is that each queue n is pinned to CPU core n, and work will be done there.
+https://lwn.net/Articles/412062/
 
-If instead, sends are being done on different cores to where we queue up the packets, this could explain the perf difference between my setup, and the expected line rate.
+Is this active during AF_XDP sends? My assumption is that each queue n is pinned to CPU core n, and work will be done across all CPUs, but maybe it needs configuration.
 
-https://github.com/xdp-project/xdp-cpumap-tc
+Some good stuff about linux RSS and XPS here:
 
+https://archive.fosdem.org/2021/schedule/event/network_performance_in_kernel/attachments/slides/4433/export/events/attachments/network_performance_in_kernel/slides/4433/chevallier_network_performance_in_the_linux_kernel.pdf
 
+More:
 
-...
+https://stackoverflow.com/questions/69625587/linux-transmit-packet-steering-xps-issue
+
+Scaling in the Linux network stack:
+
+https://www.kernel.org/doc/html/v5.10/networking/scaling.html
