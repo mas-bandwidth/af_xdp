@@ -32,7 +32,7 @@
 #include <errno.h>
 #include <inttypes.h>
 
-#define NUM_CPUS 16
+#define NUM_CPUS 32
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
@@ -48,7 +48,7 @@ const uint16_t CLIENT_PORT = 40000;
 
 const int PAYLOAD_BYTES = 0;
 
-const int SEND_BATCH_SIZE = 64;
+const int SEND_BATCH_SIZE = 256;
 
 #define NUM_FRAMES 16384
 
