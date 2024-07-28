@@ -17,7 +17,7 @@ Preamble                          blue      8 bytes       8 B
 Payload                           green   124 bytes     132 B
 Frame Check Sequence              yellow    4 bytes     136 B
 Epilogue                          purple    1 bytes     137 B
-Inter Frame Gap (+Epilogue its 12B)	red    11 bytes     148 B
+Inter Frame Gap                   red      11 bytes     148 B
 ```
 
 So our 100 byte UDP packet expands to 148 bytes on the wire.
