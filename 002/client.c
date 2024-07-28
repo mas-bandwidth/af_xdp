@@ -1,4 +1,4 @@
-/*
+
     UDP client (userspace)
 
     Runs on Ubuntu 22.04 LTS 64bit with Linux Kernel 6.5+ *ONLY*
@@ -32,7 +32,7 @@
 #include <errno.h>
 #include <inttypes.h>
 
-#define NUM_CPUS 1
+#define NUM_CPUS 2
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
@@ -78,6 +78,7 @@ struct client_t
     bool attached_skb;
     struct socket_t socket[NUM_CPUS];
     pthread_t stats_thread;
+    pthread_t socket_thread[NUM_CPUS];
     uint64_t previous_sent_packets;
 };
 
@@ -500,6 +501,16 @@ void socket_update( struct socket_t * socket, int queue_id )
     }
 }
 
+static void * socket_thread( void * arg )
+{
+    struct socket_t * socket = (struct socket_t*) arg;
+
+    while ( !quit )
+    {
+        socket_update( socket, (int) socket - &client.socket[0] );
+    }
+}
+
 int main( int argc, char * argv[] )
 {
     printf( "\n[client]\n" );
@@ -514,10 +525,7 @@ int main( int argc, char * argv[] )
         return 1;
     }
 
-    while ( !quit )
-    {
-        socket_update( &client.socket[0], 0 );        // todo: thread per-socket
-    }
+    socket_thread( client->socket[0] );
 
     cleanup();
 
