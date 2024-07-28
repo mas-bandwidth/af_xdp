@@ -68,6 +68,7 @@ struct socket_t
     uint32_t num_frames;
     uint64_t sent_packets;
     uint32_t counter;
+    int queue_id;
 };
 
 struct client_t
@@ -232,6 +233,10 @@ int client_init( struct client_t * client, const char * interface_name )
         }
 
         client->socket[i].num_frames = NUM_FRAMES;
+
+        // set socket queue id for later use
+
+        client->socket[i].queue_id = i;
     }
 
     // create stats thread
@@ -520,7 +525,7 @@ static void * socket_thread( void * arg )
 {
     struct socket_t * socket = (struct socket_t*) arg;
 
-    int queue_id = (int) ( socket - &client.socket[0] );
+    int queue_id = socket->queue_id;
 
     printf( "started socket thread for queue #%d\n", queue_id );
 
