@@ -50,3 +50,27 @@ https://stackoverflow.com/questions/69625587/linux-transmit-packet-steering-xps-
 Scaling in the Linux network stack:
 
 https://www.kernel.org/doc/html/v5.10/networking/scaling.html
+
+Hilariously, if I now reduce to send with just one CPU, I can still push the same amount of packets:
+
+```
+sent delta 7531020
+sent delta 7531004
+sent delta 7531068
+sent delta 7531012
+sent delta 7531072
+sent delta 7531012
+sent delta 7531064
+sent delta 7531072
+sent delta 7531020
+sent delta 7531128
+sent delta 7531008
+sent delta 7530876
+sent delta 7530946
+sent delta 7530954
+sent delta 7530932
+sent delta 7530948
+sent delta 7531016
+```
+
+Not really sure what is going on yet, but it seems as far as I can tell, if I do things right, there should be no problem hitting line rate for a 10G NIC sending on just one CPU, from what I am reading.
