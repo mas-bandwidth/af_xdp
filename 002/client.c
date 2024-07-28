@@ -32,7 +32,7 @@
 #include <errno.h>
 #include <inttypes.h>
 
-#define NUM_CPUS 32
+#define NUM_CPUS 2
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
@@ -50,7 +50,7 @@ const int PAYLOAD_BYTES = 0;
 
 const int SEND_BATCH_SIZE = 256;
 
-#define NUM_FRAMES 16384
+#define NUM_FRAMES 4096
 
 #define FRAME_SIZE XSK_UMEM__DEFAULT_FRAME_SIZE
 
