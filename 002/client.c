@@ -498,7 +498,7 @@ void socket_update( struct socket_t * socket, int queue_id )
 
     // send queued packets
 
-    sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
+    // sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
 
     // mark completed sent packet frames as free to be reused
 
