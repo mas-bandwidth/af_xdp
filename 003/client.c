@@ -46,7 +46,7 @@ const uint16_t SERVER_PORT = 40000;
 
 const uint16_t CLIENT_PORT = 40000;
 
-const int PAYLOAD_BYTES = 36;   // 60 byte packet including IPv4 (20 bytes) and UDP header (8 bytes). Just 36 bytes of payload. Standard line rate packet size of 60 bytes payload over ethernet + 4 bytes 
+const int PAYLOAD_BYTES = 100;
 
 const int SEND_BATCH_SIZE = 256;
 
