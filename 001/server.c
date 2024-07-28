@@ -80,7 +80,7 @@ int server_init( struct server_t * server, const char * interface_name )
 
         if ( !found )
         {
-            printf( "\nerror: could not find any network interface matching '%s'", interface_name );
+            printf( "\nerror: could not find any network interface matching '%s'\n\n", interface_name );
             return 1;
         }
     }
