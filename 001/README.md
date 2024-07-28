@@ -28,17 +28,13 @@ In server.c:
 const char * INTERFACE_NAME = "enp8s0f0";
 ```
 
-Then:
+Run the server:
 
-`make`
+`make && sudo ./server`
 
-To run the server:
+Run the client:
 
-`sudo ./server`
-
-To run the client:
-
-`sudo ./client`
+`make && sudo ./client`
 
 You should see this on the server:
 
