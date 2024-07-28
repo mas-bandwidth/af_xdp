@@ -347,21 +347,21 @@ static void cleanup()
     fflush( stdout );
 }
 
-uint64_t client_alloc_frame( struct client_t * client )
+uint64_t socket_alloc_frame( struct socket_t * socket )
 {
-    if ( client->num_frames == 0 )
+    if ( socket->num_frames == 0 )
         return INVALID_FRAME;
-    client->num_frames--;
-    uint64_t frame = client->frames[client->num_frames];
-    client->frames[client->num_frames] = INVALID_FRAME;
+    socket->num_frames--;
+    uint64_t frame = socket->num_frames];
+    socket->frames[socket->num_frames] = INVALID_FRAME;
     return frame;
 }
 
-void client_free_frame( struct client_t * client, uint64_t frame )
+void socket_free_frame( struct socket_t * socket, uint64_t frame )
 {
-    assert( client->num_frames < NUM_FRAMES );
-    client->frames[client->num_frames] = frame;
-    client->num_frames++;
+    assert( socket->num_frames < NUM_FRAMES );
+    socket->frames[socket->num_frames] = frame;
+    socket->num_frames++;
 }
 
 uint16_t ipv4_checksum( const void * data, size_t header_length )
