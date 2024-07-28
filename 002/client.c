@@ -426,7 +426,7 @@ int client_generate_packet( void * data, int payload_bytes, uint32_t counter )
     ip->ttl      = 64;
     ip->tot_len  = htons( sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes );
     ip->protocol = IPPROTO_UDP;
-    ip->saddr    = 0xc0a80000;// | ( counter & 0xFF ); // 192.168.*.*
+    ip->saddr    = 0xc0a80000 | ( counter & 0xFF ); // 192.168.*.*
     ip->daddr    = SERVER_IPV4_ADDRESS;
     ip->check    = 0; 
     ip->check    = ipv4_checksum( ip, sizeof( struct iphdr ) );
