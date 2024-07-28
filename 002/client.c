@@ -513,8 +513,6 @@ void socket_update( struct socket_t * socket, int queue_id )
         xsk_ring_cons__release( &socket->complete_queue, completed );
 
         __sync_fetch_and_add( &socket->sent_packets, completed );
-
-        socket->counter += completed;
     }
 }
 
