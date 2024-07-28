@@ -234,7 +234,7 @@ int client_init( struct client_t * client, const char * interface_name )
 
         // allocate umem
 
-        ret = xsk_umem__create( &client->socket[i].umem, client->socket[i].buffer, buffer_size, &client->fill_queue, &client->complete_queue, NULL );
+        ret = xsk_umem__create( &client->socket[i].umem, client->socket[i].buffer, buffer_size, &client->socket[i].fill_queue, &client->socket[i].complete_queue, NULL );
         if ( ret ) 
         {
             printf( "\nerror: could not create umem\n\n" );
