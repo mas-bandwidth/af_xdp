@@ -210,7 +210,7 @@ int client_init( struct client_t * client, const char * interface_name )
 
         memset( &xsk_config, 0, sizeof(xsk_config) );
 
-        xsk_config.rx_size = 0;
+        xsk_config.rx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
         xsk_config.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
         xsk_config.xdp_flags = XDP_ZEROCOPY;                                            // force zero copy mode
         xsk_config.bind_flags = XDP_USE_NEED_WAKEUP;                                    // manually wake up the driver when it needs to do work to send packets
