@@ -429,10 +429,8 @@ int client_generate_packet( void * data, int payload_bytes, uint32_t counter )
     return sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes; 
 }
 
-void client_update( struct client_t * client, int queue_id )
+void socket_update( struct socket_t * socket, int queue_id )
 {
-    struct socket_t * socket = &client->socket[queue_id];
-
     // don't do anything if we don't have enough free packets to send a batch
 
     if ( socket->num_frames < SEND_BATCH_SIZE )
@@ -518,7 +516,7 @@ int main( int argc, char * argv[] )
 
     while ( !quit )
     {
-        client_update( &client, 0 );        // todo: thread per-socket
+        socket_update( &client.socket[0], 0 );        // todo: thread per-socket
     }
 
     cleanup();
