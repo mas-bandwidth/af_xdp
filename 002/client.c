@@ -496,7 +496,7 @@ void client_update( struct client_t * client, int queue_id )
     {
         for ( int i = 0; i < completed; i++ )
         {
-            client_free_frame( client, *xsk_ring_cons__comp_addr( &socket->complete_queue, complete_index++ ) );
+            socket_free_frame( socket, *xsk_ring_cons__comp_addr( &socket->complete_queue, complete_index++ ) );
         }
 
         xsk_ring_cons__release( &socket->complete_queue, completed );
