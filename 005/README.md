@@ -12,7 +12,7 @@ It's possible that some of these settings are reducing throughput?
 
 In this version, I force to zero copy mode on the AF_XDP, to make absolutely sure we're getting zero copy mode, and enable the need wakeup for sends. Theoretically, this should help.
 
-I also try increasing the size of the UMEM where sent packets are written, and increase the batch size, so we're sending more packets per-iteration.
+I also tried decreasing the size of the frame to fit the packets we're sending tightly, increasing the size of the UMEM where sent packets are written, and increase the batch size, so we're sending more packets per-iteration.
 
 Results:
 
