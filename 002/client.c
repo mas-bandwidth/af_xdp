@@ -68,8 +68,7 @@ struct socket_t
     struct xsk_socket * xsk;
     uint64_t frames[NUM_FRAMES];
     uint32_t num_frames;
-    uint64_t current_sent_packets;
-    uint64_t previous_sent_packets;
+    uint64_t sent_packets;
 };
 
 struct client_t
@@ -80,6 +79,7 @@ struct client_t
     bool attached_skb;
     struct socket_t socket[NUM_CPUS];
     pthread_t stats_thread;
+    uint64_t previous_sent_packets;
 };
 
 volatile bool quit;
@@ -92,7 +92,11 @@ static void * stats_thread( void * arg )
     {
         usleep( 1000000 );
 
-        uint64_t sent_packets = client->current_sent_packets;
+        uint64_t sent_packets = 0;
+        for ( int i = 0; i < NUM_CPUS; i++ )
+        {
+            sent_packets += client->socket[i].sent_packets;
+        }
 
         uint64_t sent_delta = sent_packets - client->previous_sent_packets;
 
@@ -495,7 +499,7 @@ void client_update( struct client_t * client, int queue_id )
 
         xsk_ring_cons__release( &client->socket[queue_id].complete_queue, completed );
 
-        __sync_fetch_and_add( &client->socket[queue_id].current_sent_packets, completed );
+        __sync_fetch_and_add( &client->socket[queue_id].sent_packets, completed );
     }
 }
 
