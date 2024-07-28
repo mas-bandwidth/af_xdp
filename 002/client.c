@@ -440,7 +440,7 @@ void client_update( struct client_t * client, int queue_id )
 
     // don't do anything if we don't have enough free packets to send a batch
 
-    if ( socket.num_frames < SEND_BATCH_SIZE )
+    if ( socket->num_frames < SEND_BATCH_SIZE )
         return;
 
     // queue packets to send
