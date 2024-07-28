@@ -436,7 +436,7 @@ int client_generate_packet( void * data, int payload_bytes )
 
 void client_update( struct client_t * client, int queue_id )
 {
-    socket_t * socket = &client->socket[queue_id];
+    struct socket_t * socket = &client->socket[queue_id];
 
     // don't do anything if we don't have enough free packets to send a batch
 
