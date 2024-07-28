@@ -551,8 +551,6 @@ int main( int argc, char * argv[] )
         return 1;
     }
 
-    socket_thread( &client.socket[0] );
-
     while ( !quit )
     {
         usleep( 1000 );
