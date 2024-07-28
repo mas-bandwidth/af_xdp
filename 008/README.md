@@ -23,7 +23,7 @@ received delta 10952854
 received delta 10928762
 ```
 
-With a smaller packet size I can send more packets per-second, but I'm not exactly sure why we it's not hitting 14.8M packets per-second.
+With a smaller packet size I can send more packets per-second, but I'm not exactly sure why it's not hitting 14.8M packets per-second.
 
 What do I have to do to be able to hit 14.8M packets per-second on a 10G NIC with AF_XDP?
 
