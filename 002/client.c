@@ -40,8 +40,6 @@ const uint8_t CLIENT_ETHERNET_ADDRESS[] = { 0xa0, 0x36, 0x9f, 0x68, 0xeb, 0x98 }
 
 const uint8_t SERVER_ETHERNET_ADDRESS[] = { 0xa0, 0x36, 0x9f, 0x1e, 0x1a, 0xec };
 
-const uint32_t CLIENT_IPV4_ADDRESS = 0xc0a8b779; // 192.168.183.121
-
 const uint32_t SERVER_IPV4_ADDRESS = 0xc0a8b77c; // 192.168.183.124
 
 const uint16_t SERVER_PORT = 40000;
@@ -69,6 +67,7 @@ struct socket_t
     uint64_t frames[NUM_FRAMES];
     uint32_t num_frames;
     uint64_t sent_packets;
+    uint32_t counter;
 };
 
 struct client_t
@@ -406,7 +405,7 @@ int client_generate_packet( void * data, int payload_bytes )
     ip->ttl      = 64;
     ip->tot_len  = htons( sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes );
     ip->protocol = IPPROTO_UDP;
-    ip->saddr    = CLIENT_IPV4_ADDRESS;
+    ip->saddr    = 0xc0a80000 | ( counter & 0xFF ); // 192.168.*.*
     ip->daddr    = SERVER_IPV4_ADDRESS;
     ip->check    = 0; 
     ip->check    = ipv4_checksum( ip, sizeof( struct iphdr ) );
@@ -461,7 +460,7 @@ void client_update( struct client_t * client, int queue_id )
         uint8_t * packet = socket->buffer + frame;
 
         packet_address[num_packets] = frame;
-        packet_length[num_packets] = client_generate_packet( packet, PAYLOAD_BYTES );
+        packet_length[num_packets] = client_generate_packet( packet, PAYLOAD_BYTES, socket->counter + num_packets );
 
         num_packets++;
 
@@ -498,6 +497,8 @@ void client_update( struct client_t * client, int queue_id )
         xsk_ring_cons__release( &socket->complete_queue, completed );
 
         __sync_fetch_and_add( &socket->sent_packets, completed );
+
+        socket->counter += completed;
     }
 }
 

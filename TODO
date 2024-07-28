@@ -200,9 +200,11 @@ DONE
 
 	Disable hyperthreading.
 
+	Modify the code to have per-socket data.
+
 TODO
 
-	Modify the code to use two cores.
+	Implement socket threads and run it with 2 CPUs.
 
 	Modify the code to schmear an increasing counter per-send thread into the source address.
 
