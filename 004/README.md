@@ -4,12 +4,11 @@ I'm using an Intel 10G NIC for these tests.
 
 How many 100 byte packets can we _theoretically_ send over a 10gbit NIC per-second?
 
-This is called "line rate", which is covered really nicely in this article:
+This is called "line rate", and it's covered really nicely in this article:
 
 https://www.fmad.io/blog/what-is-10g-line-rate
 
-It feels like at 100 byte packets, we're getting close to the line rate. Let's calculate it from the article.
-
+It feels like at 100 byte packets, we might be getting close to the line rate. Let's calculate it from the article.
 
 100 byte UDP payload = 20 byte IPv4 header + 8 byte UDP header + 100 bytes = 124 bytes payload per-packet at the ethernet level:
 
@@ -29,4 +28,6 @@ So our 100 byte UDP packet expands to 148 bytes on the ethernet wire.
 
 So the theoretical maximum number of 100 byte packets we should be able to send over 10G is 8.4M packets per-second.
 
-We're close but we're not quite hitting that, even though all cores on the client are sending packets. What's up?
+We're close (~7.5M pps) but we're not quite hitting line rate, even though all cores on the client are sending packets. 
+
+What's up?

@@ -21,8 +21,7 @@ received delta 6600495
 received delta 6599516
 ```
 
-
-Increasing to 32 send threads, the results are now slightly improved, but are starting to hit in upper limit due to 10G bandwidth @ 100 byte packets:
+Increasing to 32 send threads, the results are now slightly improved, but are starting to hit some sort of limit:
 
 ```
 sent delta 7536128
