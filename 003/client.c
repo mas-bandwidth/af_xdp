@@ -212,8 +212,8 @@ int client_init( struct client_t * client, const char * interface_name )
 
         xsk_config.rx_size = 0;
         xsk_config.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
-        xsk_config.xdp_flags = XDP_ZEROCOPY;                                            // force zero copy mode
-        xsk_config.bind_flags = XDP_USE_NEED_WAKEUP;                                    // manually wake up the driver when it needs to do work to send packets
+        xsk_config.xdp_flags = 0;
+        xsk_config.bind_flags = 0;
         xsk_config.libbpf_flags = XSK_LIBBPF_FLAGS__INHIBIT_PROG_LOAD;
 
         int queue_id = i;
@@ -495,11 +495,6 @@ void socket_update( struct socket_t * socket, int queue_id )
     }
 
     xsk_ring_prod__submit( &socket->send_queue, num_packets );
-
-    // send queued packets
-
-    if ( xsk_ring_prod__needs_wakeup( &socket->send_queue ) )
-        sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
 
     // mark completed sent packet frames as free to be reused
 
