@@ -48,7 +48,7 @@ const uint16_t CLIENT_PORT = 40000;
 
 const int PAYLOAD_BYTES = 100;
 
-const int SEND_BATCH_SIZE = 1024;
+const int SEND_BATCH_SIZE = 1500;
 
 #define NUM_FRAMES (4096*16)
 
