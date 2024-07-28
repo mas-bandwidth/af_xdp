@@ -241,7 +241,7 @@ int client_init( struct client_t * client, const char * interface_name )
             return 1;
         }
 
-        // create xsk socket and assign to network interface queue 0
+        // create xsk socket and assign to network interface queue
 
         struct xsk_socket_config xsk_config;
 
@@ -258,7 +258,7 @@ int client_init( struct client_t * client, const char * interface_name )
         ret = xsk_socket__create( &client->socket[i].xsk, interface_name, queue_id, client->socket[i].umem, NULL, &client->socket[i].send_queue, &xsk_config );
         if ( ret )
         {
-            printf( "\nerror: could not create xsk socket\n\n" );
+            printf( "\nerror: could not create xsk socket [%d]\n\n", queue_id );
             return 1;
         }
 
