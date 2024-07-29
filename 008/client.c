@@ -31,6 +31,7 @@
 #include <sched.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <poll.h>
 
 #define NUM_CPUS 8
 
@@ -452,6 +453,19 @@ int client_generate_packet( void * data, int payload_bytes, uint32_t counter )
 
 void socket_update( struct socket_t * socket, int queue_id )
 {
+    // call poll so we do driver work here, instead of softirq interrupts
+
+    struct pollfd fds[2];
+    int ret, nfds = 1;
+
+    memset( fds, 0, sizeof(fds) );
+    fds[0].fd = xsk_socket__fd( socket->xsk );
+    fds[0].events = POLLOUT;
+
+    ret = poll( fds, nfds, -1 );
+    if ( ret <= 0 || ret > 1 )
+        return;
+
     // don't do anything if we don't have enough free packets to send a batch
 
     if ( socket->num_frames < SEND_BATCH_SIZE )
