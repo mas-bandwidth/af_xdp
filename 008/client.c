@@ -32,7 +32,7 @@
 #include <errno.h>
 #include <inttypes.h>
 
-#define NUM_CPUS 32
+#define NUM_CPUS 1
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
@@ -498,7 +498,7 @@ void socket_update( struct socket_t * socket, int queue_id )
 
     // send queued packets
 
-    sendto( xsk_socket__fd( socket->xsk ), NULL, 0, 0, NULL, 0 );
+    sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
 
     // mark completed sent packet frames as free to be reused
 
