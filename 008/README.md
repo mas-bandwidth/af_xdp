@@ -66,8 +66,8 @@ sudo systemctl disable irqbalance.service
 echo kernel.numa_balancing=0 | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 
-# limit nic to 8 queues
-sudo ethtool -L enp8s0f0 combined 8
+# limit nic to 4 queues
+sudo ethtool -L enp8s0f0 combined 4
 
 # pin irqs to cores (in theory...)
 echo 1 | sudo tee /proc/irq/135/smp_affinity
@@ -75,10 +75,6 @@ echo 2 | sudo tee /proc/irq/136/smp_affinity
 echo 4 | sudo tee /proc/irq/137/smp_affinity
 echo 8 | sudo tee /proc/irq/138/smp_affinity
 echo 10 | sudo tee /proc/irq/139/smp_affinity
-echo 20 | sudo tee /proc/irq/140/smp_affinity
-echo 40 | sudo tee /proc/irq/141/smp_affinity
-echo 80 | sudo tee /proc/irq/142/smp_affinity
-echo 100 | sudo tee /proc/irq/143/smp_affinity
 ```
 
 It's helping a bit but I don't think it's completely working, but I'm also quite a bit over my head here... HELP! :)
