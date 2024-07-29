@@ -30,3 +30,55 @@ With a smaller packet size I can send more packets per-second, but I'm not exact
 What do I have to do to hit line rate on a 10G NIC with AF_XDP?
 
 Please email glenn@mas-bandwidth.com if you know!
+
+UPDATE:
+
+After much noodling, the best I can do is:
+
+```
+sent delta 1275622
+sent delta 1275366
+sent delta 1275639
+sent delta 1275697
+sent delta 1275890
+sent delta 1275365
+sent delta 1275917
+sent delta 1275354
+sent delta 1275698
+sent delta 1275627
+sent delta 1275675
+sent delta 1275621
+sent delta 1275680
+sent delta 1275617
+```
+
+With a whole bunch of shit, disabling hyperthreading and trying to pin the IRQ processing to cores -- the basic theory being that my machine has NUMA nodes, and I really want the processing for sends to happen on the same CPU and NUMA node that queued them up in the UMUM.
+
+```console
+# disable hyperthreading
+echo off | sudo tee /sys/devices/system/cpu/smt/control
+
+# stop and disable the irqbalance service
+sudo systemctl stop irqbalance.service
+sudo systemctl disable irqbalance.service
+
+# disable numa balancing
+echo kernel.numa_balancing=0 | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+# limit nic to 8 queues
+sudo ethtool -L enp8s0f0 combined 8
+
+# pin irqs to cores (in theory...)
+echo 1 | sudo tee /proc/irq/135/smp_affinity
+echo 2 | sudo tee /proc/irq/136/smp_affinity
+echo 4 | sudo tee /proc/irq/137/smp_affinity
+echo 8 | sudo tee /proc/irq/138/smp_affinity
+echo 10 | sudo tee /proc/irq/139/smp_affinity
+echo 20 | sudo tee /proc/irq/140/smp_affinity
+echo 40 | sudo tee /proc/irq/141/smp_affinity
+echo 80 | sudo tee /proc/irq/142/smp_affinity
+echo 100 | sudo tee /proc/irq/143/smp_affinity
+```
+
+It's helping a bit but I don't think it's completely working, but I'm also quite a bit over my head here... HELP! :)
