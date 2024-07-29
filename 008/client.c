@@ -501,6 +501,8 @@ void socket_update( struct socket_t * socket, int queue_id )
 
     xsk_ring_prod__submit( &socket->send_queue, num_packets );
 
+    sendto( xsk_socket__fd( socket->xsk ), NULL, 0, 0, NULL, 0 );
+
     // mark completed sent packet frames as free to be reused
 
     uint32_t complete_index;
