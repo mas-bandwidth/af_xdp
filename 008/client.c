@@ -454,7 +454,7 @@ void socket_update( struct socket_t * socket, int queue_id )
 {
     // periodically wake up so the driver can do work in our process instead of ksoftirqd
 
-    if ( xsk_ring_prod__needs_wakeup( &socket->send_queue ) )
+    // if ( xsk_ring_prod__needs_wakeup( &socket->send_queue ) )
         sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
 
     // don't do anything if we don't have enough free packets to send a batch
