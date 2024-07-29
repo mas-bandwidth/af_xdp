@@ -33,7 +33,7 @@
 #include <inttypes.h>
 #include <poll.h>
 
-#define NUM_CPUS 8
+#define NUM_CPUS 2
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
