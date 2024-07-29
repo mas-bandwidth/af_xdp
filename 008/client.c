@@ -32,7 +32,7 @@
 #include <errno.h>
 #include <inttypes.h>
 
-#define NUM_CPUS 32
+#define NUM_CPUS 8
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
