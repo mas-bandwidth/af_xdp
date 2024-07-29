@@ -77,4 +77,4 @@ echo 8 | sudo tee /proc/irq/138/smp_affinity
 echo 10 | sudo tee /proc/irq/139/smp_affinity
 ```
 
-It's helping a bit but I don't think it's completely working, but I'm also quite a bit over my head here... HELP! :)
+It's helping a bit _maybe_ but I don't think it's completely working, but I'm also quite a bit over my head here... HELP! :)
