@@ -10,17 +10,17 @@ https://www.fmad.io/blog/what-is-10g-line-rate
 
 It feels like at 100 byte packets, we might be getting close to the line rate. Let's calculate it from the article.
 
-100 byte UDP payload = 20 byte IPv4 header + 8 byte UDP header + 100 bytes = 124 bytes payload per-packet at the ethernet level:
+100 byte UDP payload = 20 byte IPv4 header + 8 byte UDP header + 100 bytes = 124 bytes ethernet payload on the wire:
 
 ```
-Preamble	                        blue	  8 bytes		8 B
-Payload	                            green	124 bytes     132 B
-Frame Check Sequence	            yellow	  4 bytes     136 B
-Epilogue	                        purple	  1 bytes     137 B
-Inter Frame Gap (+Epilogue its 12B)	red	     11 bytes     148 B
+Preamble                          blue      8 bytes       8 B
+Payload                           green   124 bytes     132 B
+Frame Check Sequence              yellow    4 bytes     136 B
+Epilogue                          purple    1 bytes     137 B
+Inter Frame Gap                   red      11 bytes     148 B
 ```
 
-So our 100 byte UDP packet expands to 148 bytes on the ethernet wire.
+So our 100 byte UDP packet expands to 148 bytes on the wire.
 
 ```
 10.00e9 bits / (8 bits * 148 bytes) = ~8,445,945
