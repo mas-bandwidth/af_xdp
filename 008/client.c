@@ -452,6 +452,11 @@ int client_generate_packet( void * data, int payload_bytes, uint32_t counter )
 
 void socket_update( struct socket_t * socket, int queue_id )
 {
+    // periodically wake up so the driver can do work in our process instead of ksoftirqd
+
+    if ( xsk_ring_prod__needs_wakeup( &socket->send_queue ) )
+        sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
+
     // don't do anything if we don't have enough free packets to send a batch
 
     if ( socket->num_frames < SEND_BATCH_SIZE )
@@ -495,11 +500,6 @@ void socket_update( struct socket_t * socket, int queue_id )
     }
 
     xsk_ring_prod__submit( &socket->send_queue, num_packets );
-
-    // send queued packets
-
-    if ( xsk_ring_prod__needs_wakeup( &socket->send_queue ) )
-        sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
 
     // mark completed sent packet frames as free to be reused
 
