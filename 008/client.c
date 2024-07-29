@@ -453,19 +453,6 @@ int client_generate_packet( void * data, int payload_bytes, uint32_t counter )
 
 void socket_update( struct socket_t * socket, int queue_id )
 {
-    // call poll so we do driver work here, instead of softirq interrupts
-
-    struct pollfd fds[2];
-    int ret, nfds = 1;
-
-    memset( fds, 0, sizeof(fds) );
-    fds[0].fd = xsk_socket__fd( socket->xsk );
-    fds[0].events = POLLIN | POLLOUT;
-
-    ret = poll( fds, nfds, -1 );
-    if ( ret <= 0 || ret > 1 )
-        return;
-
     // don't do anything if we don't have enough free packets to send a batch
 
     if ( socket->num_frames < SEND_BATCH_SIZE )
@@ -512,8 +499,7 @@ void socket_update( struct socket_t * socket, int queue_id )
 
     // send queued packets
 
-    if ( xsk_ring_prod__needs_wakeup( &socket->send_queue ) )
-        sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
+    sendto( xsk_socket__fd( socket->xsk ), NULL, 0, MSG_DONTWAIT, NULL, 0 );
 
     // mark completed sent packet frames as free to be reused
 
