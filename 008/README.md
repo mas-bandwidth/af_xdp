@@ -52,7 +52,7 @@ sent delta 1275680
 sent delta 1275617
 ```
 
-With a whole bunch of shit, disabling hyperthreading and trying to pin the IRQ processing to cores -- the basic theory being that my machine has NUMA nodes, and I really want the processing for sends to happen on the same CPU and NUMA node that queued them up in the UMUM.
+With a whole bunch of shit, disabling hyperthreading and trying to pin the IRQ processing to cores -- the basic theory being that my machine has NUMA nodes, and I really want the processing for sends to happen on the same CPU and NUMA node that queued them up in the UMEM.
 
 ```console
 # disable hyperthreading
