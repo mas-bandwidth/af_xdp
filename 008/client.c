@@ -460,7 +460,7 @@ void socket_update( struct socket_t * socket, int queue_id )
 
     memset( fds, 0, sizeof(fds) );
     fds[0].fd = xsk_socket__fd( socket->xsk );
-    fds[0].events = POLLOUT;
+    fds[0].events = POLLIN | POLLOUT;
 
     ret = poll( fds, nfds, -1 );
     if ( ret <= 0 || ret > 1 )
