@@ -31,9 +31,8 @@
 #include <sched.h>
 #include <errno.h>
 #include <inttypes.h>
-#include <poll.h>
 
-#define NUM_CPUS 1
+#define NUM_CPUS 32
 
 const char * INTERFACE_NAME = "enp8s0f0";
 
