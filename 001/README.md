@@ -63,7 +63,7 @@ I'm using the Intel x540 T2 10G NIC ($160 USD each):
 
 https://www.newegg.com/intel-x540t2/p/N82E16833106083
 
-With a Netgear 10G router ($550 USD):
+With a Netgear 10G router ($450 USD):
 
 https://www.newegg.com/netgear-xs508m-100nas-7-x-10-gig-multi-gig-copper-ports-1-x-10g-1g-sfp-and-copper/p/N82E16833122954
 
